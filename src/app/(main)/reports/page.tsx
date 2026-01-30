@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { VisualizationsTab } from "./VisualizationsTab";
 
@@ -86,10 +86,20 @@ function isNumeric(value: unknown): value is number {
    });
  }
 
+const DEFAULT_SERIES_PALETTE = [
+  "#22d3ee",
+  "#f472b6",
+  "#a78bfa",
+  "#34d399",
+  "#fbbf24",
+  "#f87171",
+];
+
 function buildTimeSeriesTraces(
   rows: Record<string, unknown>[],
   fields: string[],
-  xField: string | null
+  xField: string | null,
+  fieldColors: Record<string, string> = {}
 ) {
   if (!xField || rows.length === 0 || fields.length === 0) {
     return [];
@@ -124,7 +134,7 @@ function buildTimeSeriesTraces(
   const buckets = Array.from(bucketMap.values());
   const xLabels = buckets.map((b) => b.x);
 
-  return fields.map((field) => {
+  return fields.map((field, idx) => {
     const yValues = buckets.map(({ rows: bucketRows }) => {
       let sum = 0;
       let count = 0;
@@ -139,15 +149,21 @@ function buildTimeSeriesTraces(
       return (sum / count) * 100; // percentage scale
     });
 
+    const lineColor =
+      fieldColors[field] ??
+      DEFAULT_SERIES_PALETTE[idx % DEFAULT_SERIES_PALETTE.length];
+
     return {
       x: xLabels,
       y: yValues,
       mode: "lines+markers",
       name: field,
+      line: { color: lineColor },
+      marker: { color: lineColor },
       hovertemplate: "%{x}<br>" + field + ": %{y:.2f}%<extra></extra>",
     };
   });
- }
+}
 
  const ReportsPage: React.FC = () => {
    const [states, setStates] = useState<string[]>([]);
@@ -167,9 +183,74 @@ function buildTimeSeriesTraces(
   const [selectedXAxisField, setSelectedXAxisField] = useState<string | null>(
     null
   );
-  const [avgValueColors, setAvgValueColors] = useState<Record<string, string>>(
-    {}
-  );
+  const [fieldColors, setFieldColors] = useState<Record<string, string>>({});
+  const [vizShowCurve, setVizShowCurve] = useState<Record<string, boolean>>({});
+  const skipNextSaveRef = useRef(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/reports/field-colors");
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        const colors = data?.fieldColors;
+        if (
+          colors &&
+          typeof colors === "object" &&
+          !Array.isArray(colors) &&
+          Object.values(colors).every(
+            (v) => typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v)
+          )
+        ) {
+          if (!cancelled) setFieldColors(colors as Record<string, string>);
+        }
+        const showCurve = data?.vizShowCurve;
+        if (
+          showCurve &&
+          typeof showCurve === "object" &&
+          !Array.isArray(showCurve) &&
+          Object.values(showCurve).every((v) => typeof v === "boolean")
+        ) {
+          if (!cancelled)
+            setVizShowCurve(showCurve as Record<string, boolean>);
+        }
+      } catch {
+        // ignore fetch errors
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (skipNextSaveRef.current) {
+      skipNextSaveRef.current = false;
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/reports/field-colors", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fieldColors,
+            vizShowCurve,
+          }),
+        });
+        if (!res.ok && !cancelled) {
+          console.warn("Failed to save preferences");
+        }
+      } catch {
+        // ignore save errors
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fieldColors, vizShowCurve]);
 
   useEffect(() => {
     let cancelled = false;
@@ -265,9 +346,10 @@ function buildTimeSeriesTraces(
       buildTimeSeriesTraces(
         filteredRows,
         selectedSeriesFields,
-        effectiveXAxisField
+        effectiveXAxisField,
+        fieldColors
       ),
-    [filteredRows, selectedSeriesFields, effectiveXAxisField]
+    [filteredRows, selectedSeriesFields, effectiveXAxisField, fieldColors]
    );
 
   const handleToggleFilterValue = (field: string, value: string) => {
@@ -295,7 +377,6 @@ function buildTimeSeriesTraces(
     setFilters({});
     setSelectedFilterFields([]);
     setSelectedXAxisField(null);
-    setAvgValueColors({});
    };
 
   const toggleSelectedField = (
@@ -448,7 +529,7 @@ function buildTimeSeriesTraces(
                  ) : (
                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                      {averages.map(({ field, average }) => {
-                       const valueColor = avgValueColors[field] ?? "#22d3ee";
+                       const valueColor = fieldColors[field] ?? "#22d3ee";
                        return (
                          <div
                            key={field}
@@ -469,7 +550,7 @@ function buildTimeSeriesTraces(
                                  type="color"
                                  value={valueColor}
                                  onChange={(e) =>
-                                   setAvgValueColors((prev) => ({
+                                   setFieldColors((prev) => ({
                                      ...prev,
                                      [field]: e.target.value,
                                    }))
@@ -533,26 +614,46 @@ function buildTimeSeriesTraces(
                     <div className="max-h-32 w-full min-w-[220px] space-y-1 overflow-y-auto rounded-lg border border-slate-700 bg-slate-950/80 p-2">
                       {numericFields.map((field) => {
                         const checked = selectedSeriesFields.includes(field);
+                        const seriesColor = fieldColors[field] ?? "#22d3ee";
                         return (
-                          <label
+                          <div
                             key={field}
-                            className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-slate-800/70"
+                            className="flex items-center gap-2 rounded px-1 py-0.5 hover:bg-slate-800/70"
                           >
-                            <input
-                              type="checkbox"
-                              className="h-3 w-3 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
-                              checked={checked}
-                              onChange={() =>
-                                toggleSelectedField(
-                                  field,
-                                  setSelectedSeriesFields
-                                )
-                              }
-                            />
-                            <span className="truncate" title={field}>
-                              {field}
-                            </span>
-                          </label>
+                            <label className="flex flex-1 cursor-pointer items-center gap-2">
+                              <input
+                                type="checkbox"
+                                className="h-3 w-3 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+                                checked={checked}
+                                onChange={() =>
+                                  toggleSelectedField(
+                                    field,
+                                    setSelectedSeriesFields
+                                  )
+                                }
+                              />
+                              <span className="truncate" title={field}>
+                                {field}
+                              </span>
+                            </label>
+                            <label
+                              className="flex shrink-0 cursor-pointer"
+                              title="Set line color"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <input
+                                type="color"
+                                value={seriesColor}
+                                onChange={(e) =>
+                                  setFieldColors((prev) => ({
+                                    ...prev,
+                                    [field]: e.target.value,
+                                  }))
+                                }
+                                className="h-5 w-7 cursor-pointer rounded border border-slate-700 bg-slate-950 p-0.5"
+                              />
+                            </label>
+                          </div>
                         );
                       })}
                     </div>
@@ -623,6 +724,10 @@ function buildTimeSeriesTraces(
              <VisualizationsTab
                filteredRows={filteredRows}
                numericFields={numericFields}
+               fieldColors={fieldColors}
+               setFieldColors={setFieldColors}
+               vizShowCurve={vizShowCurve}
+               setVizShowCurve={setVizShowCurve}
              />
            )}
 

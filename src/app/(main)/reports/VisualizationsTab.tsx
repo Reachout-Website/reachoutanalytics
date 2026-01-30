@@ -13,6 +13,14 @@ const Plot = dynamic(() => import("react-plotly.js"), {
 type VisualizationsTabProps = {
   filteredRows: Record<string, unknown>[];
   numericFields: string[];
+  fieldColors: Record<string, string>;
+  setFieldColors: React.Dispatch<
+    React.SetStateAction<Record<string, string>>
+  >;
+  vizShowCurve: Record<string, boolean>;
+  setVizShowCurve: React.Dispatch<
+    React.SetStateAction<Record<string, boolean>>
+  >;
 };
 
 function isNumeric(value: unknown): value is number {
@@ -94,7 +102,15 @@ function computeStats(values: number[]) {
   };
 }
 
-function buildNormalDistributionTrace(values: number[], field: string): {
+function buildNormalDistributionTrace(
+  values: number[],
+  field: string,
+  opts: {
+    histogramColor: string;
+    curveColor: string;
+    showCurve: boolean;
+  }
+): {
   data: PlotlyData[];
   layout: PlotlyLayout;
 } {
@@ -114,40 +130,42 @@ function buildNormalDistributionTrace(values: number[], field: string): {
   const rangeMax = Number.isFinite(max) ? max : mean + 3 * std;
   const span = rangeMax - rangeMin || 1;
 
-  const numPoints = 80;
-  const xCurve: number[] = [];
-  const yCurve: number[] = [];
-  const binWidth = span / 20;
-
-  const normFactor = 1 / (std || 1);
-  for (let i = 0; i < numPoints; i++) {
-    const x = rangeMin + (span * i) / (numPoints - 1);
-    const z = (x - mean) / (std || 1);
-    const pdf = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
-    xCurve.push(x);
-    yCurve.push(pdf * values.length * binWidth * normFactor);
-  }
-
   const data: PlotlyData[] = [
     {
       type: "histogram",
       x: values,
       name: "Observed",
       opacity: 0.6,
-      marker: { color: "#22d3ee" },
+      marker: { color: opts.histogramColor },
       autobinx: true,
     },
-    {
+  ];
+
+  if (opts.showCurve) {
+    const numPoints = 80;
+    const xCurve: number[] = [];
+    const yCurve: number[] = [];
+    const binWidth = span / 20;
+    const normFactor = 1 / (std || 1);
+    for (let i = 0; i < numPoints; i++) {
+      const x = rangeMin + (span * i) / (numPoints - 1);
+      const z = (x - mean) / (std || 1);
+      const pdf =
+        (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+      xCurve.push(x);
+      yCurve.push(pdf * values.length * binWidth * normFactor);
+    }
+    data.push({
       type: "scatter",
       mode: "lines",
       x: xCurve,
       y: yCurve,
       name: "Fitted Normal",
-      line: { color: "#f97316", width: 2 },
+      line: { color: opts.curveColor, width: 2 },
       hovertemplate:
         "x=%{x:.2f}<br>Density (scaled)=%{y:.2f}<extra>Normal fit</extra>",
-    },
-  ];
+    });
+  }
 
   const layout: PlotlyLayout = {
     title: `Normal Distribution: ${field}`,
@@ -180,7 +198,11 @@ function buildNormalDistributionTrace(values: number[], field: string): {
   return { data, layout };
 }
 
-function buildBoxPlotTrace(values: number[], field: string): {
+function buildBoxPlotTrace(
+  values: number[],
+  field: string,
+  color: string = "#a855f7"
+): {
   data: PlotlyData[];
   layout: PlotlyLayout;
 } {
@@ -190,7 +212,7 @@ function buildBoxPlotTrace(values: number[], field: string): {
       y: values,
       name: field,
       boxpoints: "outliers",
-      marker: { color: "#a855f7" },
+      marker: { color },
       line: { color: "#e5e7eb" },
       hovertemplate: `${field}<br>%{y:.2f}<extra></extra>`,
     },
@@ -223,6 +245,10 @@ function buildBoxPlotTrace(values: number[], field: string): {
 export const VisualizationsTab: React.FC<VisualizationsTabProps> = ({
   filteredRows,
   numericFields,
+  fieldColors,
+  setFieldColors,
+  vizShowCurve,
+  setVizShowCurve,
 }) => {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
 
@@ -308,11 +334,19 @@ export const VisualizationsTab: React.FC<VisualizationsTabProps> = ({
             {visibleFields.map((field) => {
               const values = fieldValues.get(field) ?? [];
               const stats = computeStats(values);
+              const histogramColor = fieldColors[field] ?? "#22d3ee";
+              const curveColor = fieldColors[`${field}_curve`] ?? "#f97316";
+              const showCurve = vizShowCurve[field] !== false;
               const { data: normalData, layout: normalLayout } =
-                buildNormalDistributionTrace(values, field);
+                buildNormalDistributionTrace(values, field, {
+                  histogramColor,
+                  curveColor,
+                  showCurve,
+                });
               const { data: boxData, layout: boxLayout } = buildBoxPlotTrace(
                 values,
-                field
+                field,
+                histogramColor
               );
 
               return (
@@ -329,6 +363,52 @@ export const VisualizationsTab: React.FC<VisualizationsTabProps> = ({
                         Normal distribution approximation and box plot for the
                         filtered dataset.
                       </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 text-xs">
+                      <label className="flex items-center gap-1.5 text-slate-300">
+                        <span>Histogram</span>
+                        <input
+                          type="color"
+                          value={histogramColor}
+                          onChange={(e) =>
+                            setFieldColors((prev) => ({
+                              ...prev,
+                              [field]: e.target.value,
+                            }))
+                          }
+                          className="h-6 w-8 cursor-pointer rounded border border-slate-700 bg-slate-950 p-0.5"
+                          title="Histogram color"
+                        />
+                      </label>
+                      <label className="flex items-center gap-1.5 text-slate-300">
+                        <span>Curve</span>
+                        <input
+                          type="color"
+                          value={curveColor}
+                          onChange={(e) =>
+                            setFieldColors((prev) => ({
+                              ...prev,
+                              [`${field}_curve`]: e.target.value,
+                            }))
+                          }
+                          className="h-6 w-8 cursor-pointer rounded border border-slate-700 bg-slate-950 p-0.5"
+                          title="Curve color"
+                        />
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-2 text-slate-300">
+                        <input
+                          type="checkbox"
+                          className="h-3 w-3 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+                          checked={showCurve}
+                          onChange={(e) =>
+                            setVizShowCurve((prev) => ({
+                              ...prev,
+                              [field]: e.target.checked,
+                            }))
+                          }
+                        />
+                        Show fitted curve
+                      </label>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] text-slate-400 sm:grid-cols-3 lg:grid-cols-6">
                       {/* <div>
