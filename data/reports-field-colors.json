@@ -1,11 +1,4 @@
 {
-  "fieldColors": {
-    "TDP+BJP+JSP": "#d4ff00",
-    "TDP1": "#e1ff00",
-    "JSP5": "#ff0f0f",
-    "TDP+BJP+JSP6": "#ff9500"
-  },
-  "vizShowCurve": {
-    "TDP+BJP+JSP": false
-  }
+  "fieldColors": {},
+  "vizShowCurve": {}
 }
