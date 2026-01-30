@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
     const expectedUsername = process.env.AUTH_USERNAME;
     const expectedPassword = process.env.AUTH_PASSWORD;
     const authSecret = process.env.AUTH_SECRET;
+    console.log(expectedUsername, expectedPassword, authSecret);
 
     if (
       !expectedUsername ||
