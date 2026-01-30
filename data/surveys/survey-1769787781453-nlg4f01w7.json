@@ -1,0 +1,46 @@
+{
+  "id": "survey-1769787781453-nlg4f01w7",
+  "title": "Bihar",
+  "state": "Bihar",
+  "fileName": "file-1769787781437-435542615.xlsx",
+  "uploadedAt": "2026-01-30T15:43:01.453Z",
+  "numVariables": 5,
+  "variablesList": [
+    "Month",
+    "AIMIM+BSP+",
+    "BJP+JDU+VIP+",
+    "RJD+INC+CPI",
+    "Jan Suraaj"
+  ],
+  "numInstances": 4,
+  "data": [
+    {
+      "Month": 45870,
+      "AIMIM+BSP+": 0.06315789473684211,
+      "BJP+JDU+VIP+": 0.4,
+      "RJD+INC+CPI": 0.2982456140350877,
+      "Jan Suraaj": 0.056140350877192984
+    },
+    {
+      "Month": 45901,
+      "AIMIM+BSP+": 0.02306805074971165,
+      "BJP+JDU+VIP+": 0.40369088811995385,
+      "RJD+INC+CPI": 0.4405997693194925,
+      "Jan Suraaj": 0.07035755478662054
+    },
+    {
+      "Month": 45931,
+      "AIMIM+BSP+": 0.01775147928994083,
+      "BJP+JDU+VIP+": 0.5650887573964497,
+      "RJD+INC+CPI": 0.41420118343195267,
+      "Jan Suraaj": 0.0029585798816568047
+    },
+    {
+      "Month": 45962,
+      "AIMIM+BSP+": 0.033715441672285906,
+      "BJP+JDU+VIP+": 0.48954821308159135,
+      "RJD+INC+CPI": 0.3715441672285907,
+      "Jan Suraaj": 0.024949426837491573
+    }
+  ]
+}

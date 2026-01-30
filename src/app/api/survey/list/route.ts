@@ -2,39 +2,35 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const SURVEYS_FILE = path.join(DATA_DIR, "surveys.json");
+const SURVEYS_DIR = path.join(process.cwd(), "data", "surveys");
+const INDEX_FILE = path.join(SURVEYS_DIR, "index.json");
 
-// Read surveys from JSON file
-async function readSurveys() {
+async function readIndex(): Promise<
+  { id: string; title: string; state: string; uploadedAt: string; numInstances: number; numVariables: number }[]
+> {
   try {
-    const fileContent = await fs.readFile(SURVEYS_FILE, "utf-8");
-    return JSON.parse(fileContent);
+    const content = await fs.readFile(INDEX_FILE, "utf-8");
+    return JSON.parse(content);
   } catch {
-    return {};
+    return [];
   }
 }
 
 export async function GET() {
   try {
-    const surveys = await readSurveys();
+    const index = await readIndex();
 
-    // Transform surveys to list format for display
-    const surveysList = Object.values(surveys).map((survey: any) => ({
-      id: survey.id,
-      name: survey.title,
-      description: `Survey with ${survey.numVariables} variables and ${survey.numInstances} instances`,
-      responses: survey.numInstances,
-      updatedAt: new Date(survey.uploadedAt).toLocaleDateString(),
-      uploadedAt: survey.uploadedAt,
+    const surveysList = index.map((entry) => ({
+      id: entry.id,
+      name: entry.title,
+      description: `Survey with ${entry.numVariables} variables and ${entry.numInstances} instances`,
+      state: entry.state,
+      responses: entry.numInstances,
+      updatedAt: new Date(entry.uploadedAt).toLocaleDateString(),
+      uploadedAt: entry.uploadedAt,
     }));
 
-    // Sort by upload date (newest first)
-    surveysList.sort(
-      (a, b) =>
-        new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-    );
-
+    // Index is already newest-first from upload
     return NextResponse.json({ surveys: surveysList });
   } catch (error) {
     console.error("Fetch surveys error:", error);

@@ -8,12 +8,12 @@ export default function MainPage() {
       {/* <p className="text-gray-600 text-center max-w-md">
         Welcome to your dashboard. View and manage your surveys from here.
       </p> */}
-      {/* <Link
+      <Link
         href="/servey-lists"
         className="inline-flex items-center rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
       >
         Go to Servey Lists
-      </Link> */}
+      </Link>
       <Link
         href="/reports"
         className="inline-flex items-center rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"

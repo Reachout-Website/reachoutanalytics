@@ -2,6 +2,14 @@
 
 import React, { useState } from "react";
 
+const SURVEY_STATES = [
+  "Andhra Pradesh",
+  "Tamilnadu",
+  "Bihar",
+  "Telangana",
+  "Karnataka",
+] as const;
+
 interface UploadSurveyModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,6 +22,7 @@ export function UploadSurveyModal({
   onUploadSuccess,
 }: UploadSurveyModalProps) {
   const [title, setTitle] = useState("");
+  const [state, setState] = useState<string>(SURVEY_STATES[0]);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +62,7 @@ export function UploadSurveyModal({
       const formData = new FormData();
       formData.append("file", file);
       formData.append("title", title);
+      formData.append("state", state);
 
       const response = await fetch("/api/survey/upload", {
         method: "POST",
@@ -66,6 +76,7 @@ export function UploadSurveyModal({
 
       // Reset form
       setTitle("");
+      setState(SURVEY_STATES[0]);
       setFile(null);
       onUploadSuccess();
       onClose();
@@ -79,6 +90,7 @@ export function UploadSurveyModal({
   const handleClose = () => {
     if (!isUploading) {
       setTitle("");
+      setState(SURVEY_STATES[0]);
       setFile(null);
       setError(null);
       onClose();
@@ -138,6 +150,29 @@ export function UploadSurveyModal({
 
             <div>
               <label
+                htmlFor="state"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                State
+              </label>
+              <select
+                id="state"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                disabled={isUploading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                required
+              >
+                {SURVEY_STATES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
                 htmlFor="file"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
@@ -174,7 +209,7 @@ export function UploadSurveyModal({
               </button>
               <button
                 type="submit"
-                disabled={isUploading || !file || !title.trim()}
+                disabled={isUploading || !file || !title.trim() || !state}
                 className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isUploading ? "Uploading..." : "Upload"}

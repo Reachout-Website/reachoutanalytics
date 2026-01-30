@@ -3,32 +3,46 @@ import { promises as fs } from "fs";
 import path from "path";
 
 const DATA_DIR = path.join(process.cwd(), "data");
-const SURVEYS_FILE = path.join(DATA_DIR, "surveys.json");
+const SURVEYS_DIR = path.join(DATA_DIR, "surveys");
+const INDEX_FILE = path.join(SURVEYS_DIR, "index.json");
 
-// Ensure data directory exists
-async function ensureDataDir() {
+type SurveyIndexEntry = {
+  id: string;
+  title: string;
+  state: string;
+  uploadedAt: string;
+  numInstances: number;
+  numVariables: number;
+};
+
+// Ensure surveys directory exists
+async function ensureSurveysDir() {
   try {
-    await fs.access(DATA_DIR);
+    await fs.access(SURVEYS_DIR);
   } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.mkdir(SURVEYS_DIR, { recursive: true });
   }
 }
 
-// Read surveys from JSON file
-async function readSurveys() {
+// Read survey index
+async function readIndex(): Promise<SurveyIndexEntry[]> {
   try {
-    await ensureDataDir();
-    const fileContent = await fs.readFile(SURVEYS_FILE, "utf-8");
-    return JSON.parse(fileContent);
+    await ensureSurveysDir();
+    const content = await fs.readFile(INDEX_FILE, "utf-8");
+    return JSON.parse(content);
   } catch {
-    return {};
+    return [];
   }
 }
 
-// Write surveys to JSON file
-async function writeSurveys(surveys: Record<string, any>) {
-  await ensureDataDir();
-  await fs.writeFile(SURVEYS_FILE, JSON.stringify(surveys, null, 2), "utf-8");
+// Write survey index
+async function writeIndex(entries: SurveyIndexEntry[]) {
+  await ensureSurveysDir();
+  await fs.writeFile(
+    INDEX_FILE,
+    JSON.stringify(entries, null, 2),
+    "utf-8"
+  );
 }
 
 // Generate unique ID
@@ -41,6 +55,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const title = formData.get("title") as string;
+    const state = (formData.get("state") as string)?.trim() || "";
 
     if (!file) {
       return NextResponse.json(
@@ -56,15 +71,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!state) {
+      return NextResponse.json(
+        { error: "State is required" },
+        { status: 400 }
+      );
+    }
+
     // Create FormData for backend API
     const backendFormData = new FormData();
     backendFormData.append("file", file);
 
     // Upload to backend API
-    const backendResponse = await fetch("http://localhost:5000/api/survey/upload", {
-      method: "POST",
-      body: backendFormData,
-    });
+    const backendResponse = await fetch(
+      "http://localhost:5000/api/survey/upload",
+      {
+        method: "POST",
+        body: backendFormData,
+      }
+    );
 
     if (!backendResponse.ok) {
       const errorText = await backendResponse.text();
@@ -75,28 +100,40 @@ export async function POST(request: NextRequest) {
     }
 
     const backendData = await backendResponse.json();
-
-    // Generate unique ID for this survey
     const surveyId = generateId();
 
-    // Read existing surveys
-    const surveys = await readSurveys();
-
-    // Store survey with ID as key
-    surveys[surveyId] = {
+    const surveyRecord = {
       id: surveyId,
       title: title.trim(),
+      state,
       fileName: backendData.fileName,
       uploadedAt: new Date().toISOString(),
-      numVariables: backendData.numVariables,
-      variablesList: backendData.variablesList,
-      numInstances: backendData.numInstances,
-      data: backendData.data,
-      response: backendData, // Store full response
+      numVariables: backendData.numVariables ?? 0,
+      variablesList: backendData.variablesList ?? [],
+      numInstances: backendData.numInstances ?? 0,
+      data: backendData.data ?? [],
     };
 
-    // Write back to file
-    await writeSurveys(surveys);
+    // Save this upload to its own file
+    await ensureSurveysDir();
+    const surveyPath = path.join(SURVEYS_DIR, `${surveyId}.json`);
+    await fs.writeFile(
+      surveyPath,
+      JSON.stringify(surveyRecord, null, 2),
+      "utf-8"
+    );
+
+    // Update index
+    const index = await readIndex();
+    index.unshift({
+      id: surveyId,
+      title: surveyRecord.title,
+      state: surveyRecord.state,
+      uploadedAt: surveyRecord.uploadedAt,
+      numInstances: surveyRecord.numInstances,
+      numVariables: surveyRecord.numVariables,
+    });
+    await writeIndex(index);
 
     return NextResponse.json({
       success: true,

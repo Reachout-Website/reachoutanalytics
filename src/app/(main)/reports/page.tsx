@@ -1,37 +1,12 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import surveys from "../../../../data/surveys.json";
 import { VisualizationsTab } from "./VisualizationsTab";
 
 const Plot = dynamic(() => import("react-plotly.js"), {
   ssr: false,
 }) as React.ComponentType<any>;
-
- type SurveyRecord = {
-   id: string;
-   title: string;
-   state: string;
-   fileName: string;
-   uploadedAt: string;
-   numVariables: number;
-   variablesList: string[];
-   numInstances: number;
-   data: Record<string, unknown>[];
- };
-
- type SurveysById = Record<string, SurveyRecord>;
-
- const surveysById = surveys as SurveysById;
-
- const STATES = [
-   "Andhra Pradesh",
-   "Tamilnadu",
-   "Bihar",
-   "Telangana",
-   "Karnataka",
- ] as const;
 
  type TabKey = "trends" | "visualizations" | "geo";
 
@@ -41,43 +16,6 @@ const Plot = dynamic(() => import("react-plotly.js"), {
 
 function isNumeric(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
-}
-
-function excelSerialToYear(excelSerial: number): number | null {
-  try {
-    // Excel serial date: days since January 1, 1900 (with 1900 incorrectly treated as leap year)
-    // Convert to JavaScript Date: (excelSerial - 25569) * 86400000 milliseconds
-    const jsDate = new Date((excelSerial - 25569) * 86400000);
-    if (isNaN(jsDate.getTime())) return null;
-    return jsDate.getFullYear();
-  } catch {
-    return null;
-  }
-}
-
-function getAllStateRows(state: string) {
-  const entries = Object.values(surveysById).filter(
-    (s) => s.state === state
-  );
-  const allRows: Record<string, unknown>[] = [];
-  for (const survey of entries) {
-    if (Array.isArray(survey.data)) {
-      // Add computed Year field from date column
-      const rowsWithYear = survey.data.map((row) => {
-        const rowCopy = { ...row };
-        const dateValue = rowCopy["date"];
-        if (isNumeric(dateValue)) {
-          const year = excelSerialToYear(dateValue);
-          if (year !== null) {
-            rowCopy["Year"] = String(year);
-          }
-        }
-        return rowCopy;
-      });
-      allRows.push(...rowsWithYear);
-    }
-  }
-  return allRows;
 }
 
  function getNumericFields(rows: Record<string, unknown>[]) {
@@ -212,9 +150,11 @@ function buildTimeSeriesTraces(
  }
 
  const ReportsPage: React.FC = () => {
-   const [selectedState, setSelectedState] = useState<(typeof STATES)[number]>(
-     "Andhra Pradesh"
-   );
+   const [states, setStates] = useState<string[]>([]);
+   const [selectedState, setSelectedState] = useState<string>("");
+   const [stateRows, setStateRows] = useState<Record<string, unknown>[]>([]);
+   const [statesLoading, setStatesLoading] = useState(true);
+   const [rowsLoading, setRowsLoading] = useState(false);
    const [activeTab, setActiveTab] = useState<TabKey>("trends");
    const [selectedAvgFields, setSelectedAvgFields] = useState<string[]>([]);
    const [selectedSeriesFields, setSelectedSeriesFields] = useState<string[]>(
@@ -227,11 +167,62 @@ function buildTimeSeriesTraces(
   const [selectedXAxisField, setSelectedXAxisField] = useState<string | null>(
     null
   );
+  const [avgValueColors, setAvgValueColors] = useState<Record<string, string>>(
+    {}
+  );
 
-   const allRows = useMemo(
-     () => getAllStateRows(selectedState),
-     [selectedState]
-   );
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setStatesLoading(true);
+      try {
+        const res = await fetch("/api/reports/states");
+        if (!res.ok) return;
+        const data = await res.json();
+        const list = data.states ?? [];
+        if (!cancelled) {
+          setStates(list);
+          if (list.length > 0 && !selectedState) {
+            setSelectedState(list[0]);
+          }
+        }
+      } finally {
+        if (!cancelled) setStatesLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedState) {
+      setStateRows([]);
+      return;
+    }
+    let cancelled = false;
+    setRowsLoading(true);
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/reports/by-state?state=${encodeURIComponent(selectedState)}`
+        );
+        if (!res.ok) {
+          if (!cancelled) setStateRows([]);
+          return;
+        }
+        const data = await res.json();
+        if (!cancelled) setStateRows(data.rows ?? []);
+      } finally {
+        if (!cancelled) setRowsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedState]);
+
+   const allRows = stateRows;
 
    const numericFields = useMemo(
      () => getNumericFields(allRows),
@@ -296,7 +287,7 @@ function buildTimeSeriesTraces(
    const handleStateChange = (
      event: React.ChangeEvent<HTMLSelectElement>
    ) => {
-     const nextState = event.target.value as (typeof STATES)[number];
+     const nextState = event.target.value;
      setSelectedState(nextState);
      // Reset selections when state changes to avoid confusion.
     setSelectedAvgFields([]);
@@ -304,6 +295,7 @@ function buildTimeSeriesTraces(
     setFilters({});
     setSelectedFilterFields([]);
     setSelectedXAxisField(null);
+    setAvgValueColors({});
    };
 
   const toggleSelectedField = (
@@ -342,13 +334,18 @@ function buildTimeSeriesTraces(
                id="state-select"
                value={selectedState}
                onChange={handleStateChange}
-               className="min-w-[220px] rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm shadow-inner focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+               disabled={statesLoading}
+               className="min-w-[220px] rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm shadow-inner focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-50"
              >
-               {STATES.map((state) => (
-                 <option key={state} value={state}>
-                   {state}
-                 </option>
-               ))}
+               {states.length === 0 && !statesLoading ? (
+                 <option value="">No states with data</option>
+               ) : (
+                 states.map((state) => (
+                   <option key={state} value={state}>
+                     {state}
+                   </option>
+                 ))
+               )}
              </select>
            </div>
          </div>
@@ -450,26 +447,47 @@ function buildTimeSeriesTraces(
                    </p>
                  ) : (
                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                     {averages.map(({ field, average }) => (
-                       <div
-                         key={field}
-                         className="rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2"
-                       >
-                         <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-                           {field}
+                     {averages.map(({ field, average }) => {
+                       const valueColor = avgValueColors[field] ?? "#22d3ee";
+                       return (
+                         <div
+                           key={field}
+                           className="rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2"
+                         >
+                           <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                             {field}
+                           </div>
+                           <div className="mt-1 flex items-center gap-2">
+                             <div
+                               className="text-xl font-semibold"
+                               style={{ color: valueColor }}
+                             >
+                               {average !== null ? `${(average * 100).toFixed(2)}%` : "—"}
+                             </div>
+                             <label className="flex shrink-0 items-center" title="Set value color">
+                               <input
+                                 type="color"
+                                 value={valueColor}
+                                 onChange={(e) =>
+                                   setAvgValueColors((prev) => ({
+                                     ...prev,
+                                     [field]: e.target.value,
+                                   }))
+                                 }
+                                 className="h-6 w-8 cursor-pointer rounded border border-slate-700 bg-slate-950 p-0.5"
+                               />
+                             </label>
+                           </div>
+                           <div className="mt-0.5 text-[11px] text-slate-500">
+                             Average across{" "}
+                             <span className="font-semibold text-slate-300">
+                               all
+                             </span>{" "}
+                             records
+                           </div>
                          </div>
-                         <div className="mt-1 text-xl font-semibold text-cyan-400">
-                           {average !== null ? `${(average * 100).toFixed(2)}%` : "—"}
-                         </div>
-                         <div className="mt-0.5 text-[11px] text-slate-500">
-                           Average across{" "}
-                           <span className="font-semibold text-slate-300">
-                             {filteredRows.length}
-                           </span>{" "}
-                           records
-                         </div>
-                       </div>
-                     ))}
+                       );
+                     })}
                    </div>
                  )}
                </div>
@@ -743,7 +761,7 @@ function buildTimeSeriesTraces(
             </>
           )}
 
-           <div className="mt-4 rounded-lg border border-dashed border-slate-700 bg-slate-900/60 px-3 py-2 text-[11px] text-slate-400">
+           {/* <div className="mt-4 rounded-lg border border-dashed border-slate-700 bg-slate-900/60 px-3 py-2 text-[11px] text-slate-400">
              <div className="mb-1 font-semibold text-slate-300">
                Filter summary
              </div>
@@ -755,7 +773,7 @@ function buildTimeSeriesTraces(
                <span className="font-semibold">{allRows.length}</span> total for{" "}
                <span className="font-semibold">{selectedState}</span>).
              </div>
-           </div>
+           </div> */}
          </aside>
        </section>
      </div>

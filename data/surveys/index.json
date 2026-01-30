@@ -1,0 +1,26 @@
+[
+  {
+    "id": "survey-1769787781453-nlg4f01w7",
+    "title": "Bihar",
+    "state": "Bihar",
+    "uploadedAt": "2026-01-30T15:43:01.453Z",
+    "numInstances": 4,
+    "numVariables": 5
+  },
+  {
+    "id": "survey-1769787095614-aut3sco2i",
+    "title": "Tamilnadu Political",
+    "state": "Tamilnadu",
+    "uploadedAt": "2026-01-30T15:31:35.614Z",
+    "numInstances": 79,
+    "numVariables": 7
+  },
+  {
+    "id": "survey-1769786497192-n3ycdj4cm",
+    "title": "Andhra Political Trends",
+    "state": "Andhra Pradesh",
+    "uploadedAt": "2026-01-30T15:21:37.192Z",
+    "numInstances": 1912,
+    "numVariables": 16
+  }
+]
