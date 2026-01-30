@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import surveys from "../../../../data/surveys.json";
+import { VisualizationsTab } from "./VisualizationsTab";
 
 const Plot = dynamic(() => import("react-plotly.js"), {
   ssr: false,
@@ -364,7 +365,7 @@ function buildTimeSeriesTraces(
                onClick={() => setActiveTab("trends")}
                className={`flex-1 rounded-lg px-3 py-2 transition ${
                  activeTab === "trends"
-                   ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/40"
+                   ? "bg-fuchsia-400 text-slate-950 shadow-md shadow-cyan-500/40"
                    : "text-slate-300 hover:bg-slate-800"
                }`}
              >
@@ -375,7 +376,7 @@ function buildTimeSeriesTraces(
                onClick={() => setActiveTab("visualizations")}
                className={`flex-1 rounded-lg px-3 py-2 transition ${
                  activeTab === "visualizations"
-                   ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/40"
+                   ? "bg-orange-400 text-slate-950 shadow-md shadow-cyan-500/40"
                    : "text-slate-300 hover:bg-slate-800"
                }`}
              >
@@ -386,7 +387,7 @@ function buildTimeSeriesTraces(
                onClick={() => setActiveTab("geo")}
                className={`flex-1 rounded-lg px-3 py-2 transition ${
                  activeTab === "geo"
-                   ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/40"
+                   ? "bg-yellow-300 text-slate-950 shadow-md shadow-cyan-500/40"
                    : "text-slate-300 hover:bg-slate-800"
                }`}
              >
@@ -601,21 +602,10 @@ function buildTimeSeriesTraces(
            )}
 
            {activeTab === "visualizations" && (
-             <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/40">
-               <h3 className="text-base font-semibold mb-2">
-                 Visualizations (State Overview)
-               </h3>
-               <p className="text-xs text-slate-400 mb-3">
-                 This section can be extended with additional chart types (e.g.
-                 bar charts, distribution plots) tailored to the selected state
-                 and filters.
-               </p>
-               <div className="text-xs text-slate-500">
-                 Currently, use the <span className="font-semibold">Trends</span>{" "}
-                 tab for detailed time series and averages. You can add more
-                 Plotly charts here as needed using the same filtered dataset.
-               </div>
-             </div>
+             <VisualizationsTab
+               filteredRows={filteredRows}
+               numericFields={numericFields}
+             />
            )}
 
            {activeTab === "geo" && (
