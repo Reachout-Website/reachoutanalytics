@@ -435,7 +435,7 @@ function buildTimeSeriesTraces(
        {/* Tabs + Content & Filters */}
        <section className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(260px,1fr)]">
          {/* Left: Tabs + content */}
-         <div className="flex flex-col gap-4">
+         <div className="flex flex-col gap-2">
            {/* Tabs */}
            <div className="flex gap-2 rounded-xl border border-slate-800 bg-slate-900/70 p-1 text-sm font-medium">
              <button
@@ -449,6 +449,7 @@ function buildTimeSeriesTraces(
              >
                Trends
              </button>
+             
              <button
                type="button"
                onClick={() => setActiveTab("visualizations")}
@@ -477,100 +478,105 @@ function buildTimeSeriesTraces(
            {activeTab === "trends" && (
              <div className="flex flex-col gap-4">
                {/* 1st part: Averages */}
-               <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/40">
-                 <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                   <div>
-                     <h3 className="text-base font-semibold">
-                       Average by Fields
-                     </h3>
-                     <p className="text-xs text-slate-400">
-                       Select one or more numeric fields to see their averages
-                       for the filtered dataset.
-                     </p>
-                   </div>
-                  <div className="flex flex-col gap-1 text-xs">
-                    <span className="font-medium text-slate-300">
-                      Fields list
-                    </span>
-                    <div className="max-h-32 w-full min-w-[220px] space-y-1 overflow-y-auto rounded-lg border border-slate-700 bg-slate-950/80 p-2">
-                      {numericFields.map((field) => {
-                        const checked = selectedAvgFields.includes(field);
-                        return (
-                          <label
-                            key={field}
-                            className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-slate-800/70"
-                          >
-                            <input
-                              type="checkbox"
-                              className="h-3 w-3 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
-                              checked={checked}
-                              onChange={() =>
-                                toggleSelectedField(field, setSelectedAvgFields)
-                              }
-                            />
-                            <span className="truncate" title={field}>
-                              {field}
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
+               <div className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 pt-2 pb-4 shadow-lg shadow-slate-950/40">
+                 <div className="mb-3">
+                   <h3 className="text-base font-semibold">
+                     Average by Fields
+                   </h3>
+                   <p className="text-xs text-slate-400">
+                     Select one or more numeric fields to see their averages
+                     for the filtered dataset.
+                   </p>
                  </div>
 
-                 {selectedAvgFields.length === 0 ? (
-                   <p className="text-xs text-slate-500">
-                     Choose at least one field from the list to see averages.
-                   </p>
-                 ) : averages.length === 0 ? (
-                   <p className="text-xs text-slate-500">
-                     No data available for the current filters.
-                   </p>
-                 ) : (
-                   <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                     {averages.map(({ field, average }) => {
-                       const valueColor = fieldColors[field] ?? "#22d3ee";
-                       return (
-                         <div
-                           key={field}
-                           className="rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2"
-                         >
-                           <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-                             {field}
-                           </div>
-                           <div className="mt-1 flex items-center gap-2">
+                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_minmax(220px,260px)]">
+                   {/* Left: selected fields averages in 2–3 columns */}
+                   <div className="min-w-0">
+                     {selectedAvgFields.length === 0 ? (
+                       <p className="text-xs text-slate-500">
+                         Choose at least one field from the list to see averages.
+                       </p>
+                     ) : averages.length === 0 ? (
+                       <p className="text-xs text-slate-500">
+                         No data available for the current filters.
+                       </p>
+                     ) : (
+                       <div className="grid gap-3 grid-cols-2 xl:grid-cols-3">
+                         {averages.map(({ field, average }) => {
+                           const valueColor = fieldColors[field] ?? "#22d3ee";
+                           return (
                              <div
-                               className="text-xl font-semibold"
-                               style={{ color: valueColor }}
+                               key={field}
+                               className="rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2"
                              >
-                               {average !== null ? `${(average * 100).toFixed(2)}%` : "—"}
+                               <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                                 {field}
+                               </div>
+                               <div className="mt-1 flex items-center gap-2">
+                                 <div
+                                   className="text-xl font-semibold"
+                                   style={{ color: valueColor }}
+                                 >
+                                   {average !== null ? `${(average * 100).toFixed(2)}%` : "—"}
+                                 </div>
+                                 <label className="flex shrink-0 items-center" title="Set value color">
+                                   <input
+                                     type="color"
+                                     value={valueColor}
+                                     onChange={(e) =>
+                                       setFieldColors((prev) => ({
+                                         ...prev,
+                                         [field]: e.target.value,
+                                       }))
+                                     }
+                                     className="h-6 w-8 cursor-pointer rounded border border-slate-700 bg-slate-950 p-0.5"
+                                   />
+                                 </label>
+                               </div>
+                               <div className="mt-0.5 text-[11px] text-slate-500">
+                                 Average across{" "}
+                                 <span className="font-semibold text-slate-300">
+                                   all
+                                 </span>{" "}
+                                 records
+                               </div>
                              </div>
-                             <label className="flex shrink-0 items-center" title="Set value color">
-                               <input
-                                 type="color"
-                                 value={valueColor}
-                                 onChange={(e) =>
-                                   setFieldColors((prev) => ({
-                                     ...prev,
-                                     [field]: e.target.value,
-                                   }))
-                                 }
-                                 className="h-6 w-8 cursor-pointer rounded border border-slate-700 bg-slate-950 p-0.5"
-                               />
-                             </label>
-                           </div>
-                           <div className="mt-0.5 text-[11px] text-slate-500">
-                             Average across{" "}
-                             <span className="font-semibold text-slate-300">
-                               all
-                             </span>{" "}
-                             records
-                           </div>
-                         </div>
-                       );
-                     })}
+                           );
+                         })}
+                       </div>
+                     )}
                    </div>
-                 )}
+
+                   {/* Right: fields list */}
+                   <div className="flex flex-col gap-1 text-xs">
+                     <span className="font-medium text-slate-300">
+                       Fields list
+                     </span>
+                     <div className="max-h-48 w-full min-w-0 space-y-1 overflow-y-auto rounded-lg border border-slate-700 bg-slate-950/80 p-2">
+                       {numericFields.map((field) => {
+                         const checked = selectedAvgFields.includes(field);
+                         return (
+                           <label
+                             key={field}
+                             className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-slate-800/70"
+                           >
+                             <input
+                               type="checkbox"
+                               className="h-3 w-3 shrink-0 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+                               checked={checked}
+                               onChange={() =>
+                                 toggleSelectedField(field, setSelectedAvgFields)
+                               }
+                             />
+                             <span className="truncate" title={field}>
+                               {field}
+                             </span>
+                           </label>
+                         );
+                       })}
+                     </div>
+                   </div>
+                 </div>
                </div>
 
                {/* 2nd part: Time Series SSA-style decomposition */}

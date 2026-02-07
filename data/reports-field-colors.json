@@ -1,4 +1,6 @@
 {
   "fieldColors": {},
-  "vizShowCurve": {}
+  "vizShowCurve": {
+    "swing_JSP": false
+  }
 }

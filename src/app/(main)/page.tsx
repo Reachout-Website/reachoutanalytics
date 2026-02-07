@@ -20,6 +20,12 @@ export default function MainPage() {
       >
         Go to Reports
       </Link>
+      <Link
+        href="/geo"
+        className="inline-flex items-center rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+      >
+        Go to Geo Reports
+      </Link>
     </main>
   );
 }
