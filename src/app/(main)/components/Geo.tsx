@@ -29,6 +29,38 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? "";
 const INDIA_CENTER: [number, number] = [78.9629, 20.5937];
 const INDIA_ZOOM = 4;
 
+// State bounds for zooming to selected state
+const STATE_BOUNDS: Record<string, { center: [number, number]; zoom: number }> = {
+  "Andhra Pradesh": { center: [79.5941, 15.9129], zoom: 7 },
+  "Arunachal Pradesh": { center: [93.6053, 28.2180], zoom: 6 },
+  "Assam": { center: [92.9375, 26.2006], zoom: 7 },
+  "Bihar": { center: [85.3140, 25.0961], zoom: 7 },
+  "Chhattisgarh": { center: [84.0855, 21.2787], zoom: 7 },
+  "Goa": { center: [73.8278, 15.2993], zoom: 8 },
+  "Gujarat": { center: [72.6369, 22.2587], zoom: 7 },
+  "Haryana": { center: [77.0266, 29.0588], zoom: 8 },
+  "Himachal Pradesh": { center: [77.1734, 31.7433], zoom: 7 },
+  "Jharkhand": { center: [85.2799, 23.6102], zoom: 7 },
+  "Karnataka": { center: [75.7139, 15.3173], zoom: 7 },
+  "Kerala": { center: [76.2711, 10.8505], zoom: 7 },
+  "Madhya Pradesh": { center: [78.6569, 22.9375], zoom: 6 },
+  "Maharashtra": { center: [75.7139, 19.7515], zoom: 7 },
+  "Manipur": { center: [94.7822, 24.6637], zoom: 7 },
+  "Meghalaya": { center: [91.8960, 25.4670], zoom: 8 },
+  "Mizoram": { center: [93.2891, 23.1645], zoom: 7 },
+  "Nagaland": { center: [94.5623, 26.1584], zoom: 7 },
+  "Odisha": { center: [85.0980, 20.9517], zoom: 7 },
+  "Punjab": { center: [75.5762, 31.1471], zoom: 7 },
+  "Rajasthan": { center: [75.8245, 27.0238], zoom: 6 },
+  "Sikkim": { center: [88.5122, 27.5330], zoom: 8 },
+  "Tamil Nadu": { center: [78.6829, 11.1271], zoom: 7 },
+  "Telangana": { center: [78.4740, 18.1124], zoom: 7 },
+  "Tripura": { center: [91.9455, 23.9408], zoom: 8 },
+  "Uttar Pradesh": { center: [79.0193, 26.8467], zoom: 6 },
+  "Uttarakhand": { center: [79.8711, 30.0668], zoom: 7 },
+  "West Bengal": { center: [88.3639, 24.7433], zoom: 7 },
+};
+
 // Value -> color palette (reference style: red, blue, grey, etc.)
 const VALUE_COLORS: Record<string, string> = {
   TDP: "#dc2626",
@@ -151,6 +183,16 @@ export default function Geo() {
       attributionControl: false,
     });
 
+    mapInstance.on('style.load', () => {
+    mapInstance.setFog({
+        'range': [0.5, 10],
+        'color': '#24242e',
+        'high-color': '#24242e',
+        'space-color': '#000000',
+        'star-intensity': 0.5
+    });
+});
+
     mapInstance.addControl(new mapboxgl.NavigationControl(), "bottom-right");
     mapInstance.addControl(new mapboxgl.FullscreenControl(), "bottom-right");
 
@@ -167,6 +209,30 @@ export default function Geo() {
       setMapReady(false);
     };
   }, []);
+
+  // Handle map zoom/rotation when state filter changes
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapReady) return;
+
+    if (stateFilter && STATE_BOUNDS[stateFilter]) {
+      const { center, zoom } = STATE_BOUNDS[stateFilter];
+      m.flyTo({
+        center: center,
+        zoom: zoom,
+        duration: 1500,
+        essential: true,
+      });
+    } else if (!stateFilter) {
+      // Reset to India view when no state is selected
+      m.flyTo({
+        center: INDIA_CENTER,
+        zoom: INDIA_ZOOM,
+        duration: 1500,
+        essential: true,
+      });
+    }
+  }, [stateFilter, mapReady]);
 
   // Update GeoJSON source when data changes
   useEffect(() => {
