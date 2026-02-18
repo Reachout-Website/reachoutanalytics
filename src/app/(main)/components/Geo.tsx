@@ -53,7 +53,7 @@ const STATE_BOUNDS: Record<string, { center: [number, number]; zoom: number }> =
   "Punjab": { center: [75.5762, 31.1471], zoom: 7 },
   "Rajasthan": { center: [75.8245, 27.0238], zoom: 6 },
   "Sikkim": { center: [88.5122, 27.5330], zoom: 8 },
-  "Tamil Nadu": { center: [78.6829, 11.1271], zoom: 7 },
+  "Tamilnadu": { center: [78.6829, 11.1271], zoom: 7 },
   "Telangana": { center: [78.4740, 18.1124], zoom: 7 },
   "Tripura": { center: [91.9455, 23.9408], zoom: 8 },
   "Uttar Pradesh": { center: [79.0193, 26.8467], zoom: 6 },
@@ -139,13 +139,17 @@ export default function Geo() {
       }
       const rows: GeoSample[] = await res.json();
       setData(rows);
-      if (!stateFilter && !yoeFilter && !valueFilter) {
-        setFilterOptions({
-          states: [...new Set(rows.map((d) => d.state).filter(Boolean))].sort(),
-          yoeValues: [...new Set(rows.map((d) => d.YOE).filter(Boolean))].sort(),
-          valueOptions: [...new Set(rows.map((d) => d.value).filter(Boolean))].sort(),
-        });
-      }
+      // Keep a persistent list of all states once loaded (avoid overwriting when
+      // applying state/YOE/value filters). Always derive YOE and Value options
+      // from the currently returned rows so they reflect the active state filter.
+      setFilterOptions((prev) => ({
+        states:
+          prev.states.length > 0
+            ? prev.states
+            : [...new Set(rows.map((d) => d.state).filter(Boolean))].sort(),
+        yoeValues: [...new Set(rows.map((d) => d.YOE).filter(Boolean))].sort(),
+        valueOptions: [...new Set(rows.map((d) => d.value).filter(Boolean))].sort(),
+      }));
       return rows;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -239,9 +243,15 @@ export default function Geo() {
     const m = map.current;
     if (!m || !mapReady) return;
 
+    // Use only the data for the selected state when rendering/legending.
+    const displayedData = stateFilter ? data.filter((d) => d.state === stateFilter) : data;
+
+    // Build a color map only for values present in the displayed data so the legend
+    // and map colors reflect the selected state.
+    const presentValues = [...new Set(displayedData.map((d) => d.value).filter(Boolean))];
     const valueToColor = new Map<string, string>();
-    filterOptions.valueOptions.forEach((v, i) => valueToColor.set(v, getColorForValue(v, i)));
-    const geoJson = buildGeoJson(data, valueToColor);
+    presentValues.forEach((v, i) => valueToColor.set(v, getColorForValue(v, i)));
+    const geoJson = buildGeoJson(displayedData, valueToColor);
 
     const addOrUpdateLayers = () => {
       if (m.getLayer("geo-cluster-count")) m.removeLayer("geo-cluster-count");
@@ -300,37 +310,31 @@ export default function Geo() {
 
       m.off("click", "geo-points");
       m.off("click", "geo-clusters");
-      m.on(
-        "click",
-        "geo-points",
-        (e: {
-          features?: {
-            geometry: GeoJSON.Point;
-            properties: Record<string, string>;
-          }[];
-          lngLat: { lng: number; lat: number };
-        }) => {
-          if (!e.features?.[0]) return;
-          const props = e.features[0].properties as Record<string, string>;
-          const coords = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [
-            number,
-            number,
-          ];
-          while (Math.abs(e.lngLat.lng - coords[0]) > 180)
-            coords[0] += e.lngLat.lng > coords[0] ? 360 : -360;
-          new mapboxgl.Popup()
-            .setLngLat(coords)
-            .setHTML(
-              `<div class="text-sm text-zinc-900">
+      m.on("click", "geo-points", (e: any) => {
+        if (!e.features?.[0]) return;
+        const props = e.features[0].properties as Record<string, string>;
+        const coords = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [
+          number,
+          number,
+        ];
+        while (Math.abs(e.lngLat.lng - coords[0]) > 180) coords[0] += e.lngLat.lng > coords[0] ? 360 : -360;
+
+        // Set the state filter to the clicked feature's state so the legend and map
+        // update to show only that state's data.
+        if (props.state) setStateFilter(props.state);
+
+        new mapboxgl.Popup()
+          .setLngLat(coords)
+          .setHTML(
+            `<div class="text-sm text-zinc-900">
                 <strong>${props.location ?? ""}</strong>, ${props.district ?? ""}<br/>
                 State: ${props.state ?? ""}<br/>
                 YOE: ${props.YOE ?? ""}<br/>
                 Value: ${props.value ?? ""}
               </div>`
-            )
-            .addTo(m);
-        }
-      );
+          )
+          .addTo(m);
+      });
 
       m.on("click", "geo-clusters", (e: { point: { x: number; y: number } }) => {
         const features = m.queryRenderedFeatures(e.point, { layers: ["geo-clusters"] });
@@ -368,6 +372,20 @@ export default function Geo() {
   }
 
   const { states, yoeValues, valueOptions } = filterOptions;
+
+  // Use only the data for the selected state when computing legend counts/percentages.
+  const displayedData = stateFilter ? data.filter((d) => d.state === stateFilter) : data;
+
+  // Legend options should reflect only values present in the displayed data.
+  const legendOptions = valueOptions.filter((v) => displayedData.some((d) => d.value === v));
+
+  // Compute counts and percentages for values from the displayed rows
+  const totalPoints = displayedData.length;
+  const valueCounts: Record<string, number> = {};
+  legendOptions.forEach((v) => (valueCounts[v] = 0));
+  displayedData.forEach((d) => {
+    if (d.value) valueCounts[d.value] = (valueCounts[d.value] ?? 0) + 1;
+  });
 
   const errorBanner = error ? (
     <div className="flex items-center justify-between gap-4 px-4 py-3 bg-amber-900/80 border-b border-amber-600 text-amber-100">
@@ -421,26 +439,40 @@ export default function Geo() {
         style={{ minHeight: "400px" }}
       />
 
+
       {/* Sidebar - right side (reference style) */}
       <div className="absolute top-12 right-4 bottom-4 z-10 w-56 flex flex-col gap-4">
-        {/* Legend */}
-        <div className="bg-zinc-900/90 backdrop-blur rounded-lg border border-zinc-700 p-4">
-          <h3 className="text-sm font-medium text-white mb-3">Value by location</h3>
-          <div className="space-y-2">
-            {valueOptions.map((v, i) => (
-              <div key={v} className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full shrink-0"
-                  style={{ backgroundColor: getColorForValue(v, i) }}
-                />
-                <span className="text-xs text-zinc-300 truncate">{v}</span>
-              </div>
-            ))}
-            {valueOptions.length === 0 && (
-              <p className="text-xs text-zinc-500">No values yet</p>
-            )}
+        {/* Legend (hidden until a state is selected) */}
+        {stateFilter ? (
+          <div className="bg-zinc-900/90 backdrop-blur rounded-lg border border-zinc-700 p-4">
+            <h3 className="text-sm font-medium text-white mb-3">Vote share — {stateFilter}</h3>
+            <div className="space-y-2">
+              {legendOptions.map((v, i) => (
+                <div key={v} className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full shrink-0"
+                    style={{ backgroundColor: getColorForValue(v, i) }}
+                  />
+                  <span className="text-xs text-zinc-300 truncate">{v}</span>
+
+                  <span className="text-xs text-zinc-500 ml-auto">
+                    {totalPoints > 0
+                      ? `${(((valueCounts[v] ?? 0) / Math.max(1, totalPoints)) * 100).toFixed(1)}%`
+                      : "0%"}
+                  </span>
+                </div>
+              ))}
+              {legendOptions.length === 0 && (
+                <p className="text-xs text-zinc-500">No values for this state</p>
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-zinc-900/90 backdrop-blur rounded-lg border border-zinc-700 p-4">
+            <h3 className="text-sm font-medium text-white mb-3">Vote share</h3>
+            <p className="text-xs text-zinc-500">Select a state to view vote share.</p>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="bg-zinc-900/90 backdrop-blur rounded-lg border border-zinc-700 p-4 flex-1 min-h-0 overflow-auto">
