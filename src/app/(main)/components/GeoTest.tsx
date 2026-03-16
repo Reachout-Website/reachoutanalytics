@@ -132,7 +132,7 @@ function buildGeoJson(
   };
 }
 
-export default function Geo() {
+export default function GeoTest() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<InstanceType<typeof mapboxgl.Map> | null>(null);
   const [data, setData] = useState<GeoSample[]>([]);
@@ -201,19 +201,56 @@ export default function Geo() {
     }
   }, [stateFilter, yoeFilter, valueFilter]);
 
-  // Only fetch geo data when at least one filter is selected. By default the
-  // map displays without any data (faster, empty globe). This avoids loading
-  // all rows on mount and uses predefined state names from STATE_BOUNDS.
+  // Fetch all data on initial mount to show all states' all years combined data
+  useEffect(() => {
+    const initialFetch = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const base = "http://localhost:5000/api/geo";
+        const url = `${base}/search`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          const msg =
+            (body?.error as string) ||
+            (body?.detail ? JSON.stringify(body.detail) : null) ||
+            `Failed to fetch (${res.status})`;
+          throw new Error(msg);
+        }
+        const rows: GeoSample[] = await res.json();
+        setData(rows);
+        console.log("Fetched geo data:", rows[10], rows.length);
+        // Extract all unique states, YOEs, and values
+        setFilterOptions((prev) => ({
+          states: [...new Set(rows.map((d) => d.state).filter(Boolean))].sort(),
+          yoeValues: [...new Set(rows.map((d) => d.YOE).filter(Boolean))].sort(),
+          valueOptions: [...new Set(rows.map((d) => d.value).filter(Boolean))].sort(),
+        }));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        const isBackendDown =
+          message.includes("fetch") ||
+          message.includes("Failed to fetch") ||
+          message.includes("NetworkError");
+        setError(
+          isBackendDown
+            ? "Backend unavailable. Start the Express server on port 5000 and try again."
+            : message
+        );
+        setData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    initialFetch();
+  }, []);
+
+  // Fetch geo data when filters are applied
   useEffect(() => {
     const hasFilter = Boolean(stateFilter || yoeFilter || valueFilter);
     if (hasFilter) {
       fetchData();
-    } else {
-      // Clear any previously loaded points when no filters are active
-      setData([]);
-      setLoading(false);
-      // keep predefined states; clear derived options
-      setFilterOptions((prev) => ({ ...prev, yoeValues: [], valueOptions: [] }));
     }
   }, [stateFilter, yoeFilter, valueFilter, fetchData]);
 
@@ -287,7 +324,7 @@ export default function Geo() {
     const m = map.current;
     if (!m || !mapReady) return;
 
-    // Show points only when filters are active. Default map is empty.
+    // Display all data by default, or filtered data if filters are applied
     const hasFilter = Boolean(stateFilter || yoeFilter || valueFilter);
     const displayedData = hasFilter
       ? data.filter((d) =>
@@ -295,7 +332,7 @@ export default function Geo() {
           (yoeFilter ? d.YOE === yoeFilter : true) &&
           (valueFilter ? d.value === valueFilter : true)
         )
-      : [];
+      : data; // Show all data by default
 
     // Build a color map only for values present in the displayed data so the legend
     // and map colors reflect the active filters.

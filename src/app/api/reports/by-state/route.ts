@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const state = searchParams.get("state");
+    const id = searchParams.get("id");
     if (!state || !state.trim()) {
       return NextResponse.json(
         { error: "State query parameter is required" },
@@ -42,9 +43,21 @@ export async function GET(request: NextRequest) {
     }
 
     const index = await readIndex();
-    const idsForState = index
-      .filter((e) => String(e.state).trim() === state.trim())
-      .map((e) => e.id);
+    let idsForState: string[] = [];
+    if (id && id.trim()) {
+      // If an explicit id is provided, use only that one (if present in index)
+      const found = index.find((e) => String(e.id) === id.trim());
+      if (found) {
+        idsForState = [String(found.id)];
+      } else {
+        // id not found -> return empty rows
+        return NextResponse.json({ rows: [] });
+      }
+    } else {
+      idsForState = index
+        .filter((e) => String(e.state).trim() === state.trim())
+        .map((e) => e.id);
+    }
 
     const allRows: Record<string, unknown>[] = [];
     for (const id of idsForState) {

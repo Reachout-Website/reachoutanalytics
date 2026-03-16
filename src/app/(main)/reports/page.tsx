@@ -168,6 +168,10 @@ function buildTimeSeriesTraces(
  const ReportsPage: React.FC = () => {
    const [states, setStates] = useState<string[]>([]);
    const [selectedState, setSelectedState] = useState<string>("");
+  const [surveys, setSurveys] = useState<
+    { id: string; title?: string; uploadedAt?: string; numInstances?: number }[]
+  >([]);
+  const [selectedReportId, setSelectedReportId] = useState<string>("");
    const [stateRows, setStateRows] = useState<Record<string, unknown>[]>([]);
    const [statesLoading, setStatesLoading] = useState(true);
    const [rowsLoading, setRowsLoading] = useState(false);
@@ -223,6 +227,32 @@ function buildTimeSeriesTraces(
       cancelled = true;
     };
   }, []);
+
+  // Fetch list of surveys for the selected state so user can pick a single report
+  useEffect(() => {
+    if (!selectedState) {
+      setSurveys([]);
+      setSelectedReportId("");
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/reports/list?state=${encodeURIComponent(selectedState)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) {
+          setSurveys(data.surveys ?? []);
+          setSelectedReportId("");
+        }
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedState]);
 
   useEffect(() => {
     if (skipNextSaveRef.current) {
@@ -285,9 +315,11 @@ function buildTimeSeriesTraces(
     setRowsLoading(true);
     (async () => {
       try {
-        const res = await fetch(
-          `/api/reports/by-state?state=${encodeURIComponent(selectedState)}`
-        );
+        let url = `/api/reports/by-state?state=${encodeURIComponent(selectedState)}`;
+        if (selectedReportId) {
+          url += `&id=${encodeURIComponent(selectedReportId)}`;
+        }
+        const res = await fetch(url);
         if (!res.ok) {
           if (!cancelled) setStateRows([]);
           return;
@@ -301,7 +333,7 @@ function buildTimeSeriesTraces(
     return () => {
       cancelled = true;
     };
-  }, [selectedState]);
+  }, [selectedState, selectedReportId]);
 
    const allRows = stateRows;
 
@@ -377,6 +409,8 @@ function buildTimeSeriesTraces(
     setFilters({});
     setSelectedFilterFields([]);
     setSelectedXAxisField(null);
+    setSurveys([]);
+    setSelectedReportId("");
    };
 
   const toggleSelectedField = (
@@ -428,6 +462,26 @@ function buildTimeSeriesTraces(
                  ))
                )}
              </select>
+            <label
+              htmlFor="report-select"
+              className="text-sm font-medium text-slate-300"
+            >
+              Report
+            </label>
+            <select
+              id="report-select"
+              value={selectedReportId}
+              onChange={(e) => setSelectedReportId(e.target.value)}
+              disabled={surveys.length === 0}
+              className="min-w-[260px] rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm shadow-inner focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-50"
+            >
+              <option value="">All reports</option>
+              {surveys.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title ?? s.id} {s.numInstances ? `(${s.numInstances})` : ""}
+                </option>
+              ))}
+            </select>
            </div>
          </div>
        </section>

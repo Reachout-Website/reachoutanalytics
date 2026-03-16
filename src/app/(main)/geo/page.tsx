@@ -1,5 +1,6 @@
-import Geo from "../components/Geo";
+// import Geo from "../components/Geo";
+import GeoTest from "../components/GeoTest";
 
 export default function GeoPage() {
-  return <Geo />;
+  return <GeoTest />;
 }
