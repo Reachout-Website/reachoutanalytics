@@ -132,6 +132,83 @@ function buildTimeSeriesTraces(
   }
 
   const buckets = Array.from(bucketMap.values());
+  // Try to sort buckets by x value so timeline displays in ascending order.
+  // We attempt to parse date-like keys first, then numeric keys, otherwise leave
+  // as string-sorted fallback. This handles labels like "1 Jan-25" etc.
+  const monthMap: Record<string, number> = {
+    jan: 0,
+    feb: 1,
+    mar: 2,
+    apr: 3,
+    may: 4,
+    jun: 5,
+    jul: 6,
+    aug: 7,
+    sep: 8,
+    sept: 8,
+    oct: 9,
+    nov: 10,
+    dec: 11,
+  };
+
+  const parseKeyToTs = (k: string | number): number | null => {
+    if (k == null || k === "") return null;
+    if (typeof k === "number") return k;
+    // try native date parse first
+    const native = Date.parse(k);
+    if (!Number.isNaN(native)) return native;
+    // try patterns like "1 Jan-25", "1 Jan 2025", "Jan-25", "Jan 25"
+    const s = String(k).trim();
+    const m1 = s.match(/^(\d{1,2})\s+([A-Za-z]+)[\s-]+(\d{2,4})$/);
+    if (m1) {
+      const day = parseInt(m1[1], 10);
+      const mon = m1[2].toLowerCase();
+      const yrRaw = m1[3];
+      const month = monthMap[mon.slice(0, 3)] ?? monthMap[mon];
+      if (month !== undefined && !Number.isNaN(day)) {
+        let year = parseInt(yrRaw, 10);
+        if (yrRaw.length === 2) year += year < 70 ? 2000 : 1900;
+        const dt = new Date(year, month, day);
+        if (!Number.isNaN(dt.getTime())) return dt.getTime();
+      }
+    }
+    const m2 = s.match(/^([A-Za-z]+)[\s-]+(\d{2,4})$/);
+    if (m2) {
+      const mon = m2[1].toLowerCase();
+      const yrRaw = m2[2];
+      const month = monthMap[mon.slice(0, 3)] ?? monthMap[mon];
+      if (month !== undefined) {
+        let year = parseInt(yrRaw, 10);
+        if (yrRaw.length === 2) year += year < 70 ? 2000 : 1900;
+        const dt = new Date(year, month, 1);
+        if (!Number.isNaN(dt.getTime())) return dt.getTime();
+      }
+    }
+    return null;
+  };
+
+  // Determine if a majority of keys are parseable as timestamps.
+  let parsedCount = 0;
+  for (const b of buckets) {
+    if (parseKeyToTs(b.x) !== null) parsedCount++;
+  }
+
+  if (parsedCount >= Math.ceil(buckets.length / 2)) {
+    buckets.sort((a, b) => {
+      const ta = parseKeyToTs(a.x);
+      const tb = parseKeyToTs(b.x);
+      if (ta === null && tb === null) return String(a.x).localeCompare(String(b.x));
+      if (ta === null) return 1;
+      if (tb === null) return -1;
+      return ta - tb;
+    });
+  } else if (buckets.length > 0 && typeof buckets[0].x === "number") {
+    // numeric x axis — sort numerically ascending
+    buckets.sort((a, b) => Number(a.x) - Number(b.x));
+  } else {
+    // fallback: string sort ascending
+    buckets.sort((a, b) => String(a.x).localeCompare(String(b.x)));
+  }
   const xLabels = buckets.map((b) => b.x);
 
   return fields.map((field, idx) => {
