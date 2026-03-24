@@ -40,6 +40,11 @@ function computeStats(values: number[]) {
       max: NaN,
       q1: NaN,
       q3: NaN,
+      upperLimit: NaN,
+      lowerLimit: NaN,
+      ci95: { lower: NaN, upper: NaN },
+      standardError: NaN,
+      sampleError: NaN,
     };
   }
 
@@ -63,6 +68,13 @@ function computeStats(values: number[]) {
   };
 
   const median = quantile(0.5);
+  const q1 = quantile(0.25);
+  const q3 = quantile(0.75);
+  const iqr = q3 - q1;
+
+  // Upper and lower limits (outlier boundaries using 1.5 * IQR)
+  const upperLimit = q3 + 1.5 * iqr;
+  const lowerLimit = q1 - 1.5 * iqr;
 
   // Mode: values that appear most frequently (for continuous data, bin by rounded value)
   const freq = new Map<number, number>();
@@ -88,6 +100,23 @@ function computeStats(values: number[]) {
     skewness = factor * sumCubes;
   }
 
+  // Standard error of the mean
+  const standardError = count > 1 ? std / Math.sqrt(count) : NaN;
+
+  // 95% Confidence Interval for the mean (using t-distribution approximation for n > 30, z=1.96)
+  let ci95 = { lower: NaN, upper: NaN };
+  if (count >= 2 && Number.isFinite(standardError)) {
+    // For simplicity, use z-score of 1.96 for 95% CI
+    const margin = 1.96 * standardError;
+    ci95 = {
+      lower: mean - margin,
+      upper: mean + margin,
+    };
+  }
+
+  // Sample error (margin of error)
+  const sampleError = Number.isFinite(ci95.upper) ? ci95.upper - mean : NaN;
+
   return {
     count,
     mean,
@@ -97,8 +126,13 @@ function computeStats(values: number[]) {
     skewness,
     min: sorted[0],
     max: sorted[sorted.length - 1],
-    q1: quantile(0.25),
-    q3: quantile(0.75),
+    q1,
+    q3,
+    upperLimit,
+    lowerLimit,
+    ci95,
+    standardError,
+    sampleError,
   };
 }
 
@@ -410,13 +444,7 @@ export const VisualizationsTab: React.FC<VisualizationsTabProps> = ({
                         Show fitted curve
                       </label>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] text-slate-400 sm:grid-cols-3 lg:grid-cols-6">
-                      {/* <div>
-                        <div className="text-slate-500">Count</div>
-                        <div className="font-semibold text-slate-100">
-                          {stats.count}
-                        </div>
-                      </div> */}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] text-slate-400 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10">
                       <div>
                         <div className="text-slate-500">Mean</div>
                         <div className="font-semibold text-cyan-300">
@@ -456,6 +484,46 @@ export const VisualizationsTab: React.FC<VisualizationsTabProps> = ({
                         <div className="font-semibold text-rose-300">
                           {Number.isFinite(stats.skewness)
                             ? `${(stats.skewness * 100).toFixed(3)}%`
+                            : "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500">Upper limit</div>
+                        <div className="font-semibold text-orange-300">
+                          {Number.isFinite(stats.upperLimit)
+                            ? `${(stats.upperLimit * 100).toFixed(2)}%`
+                            : "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500">Lower limit</div>
+                        <div className="font-semibold text-orange-300">
+                          {Number.isFinite(stats.lowerLimit)
+                            ? `${(stats.lowerLimit * 100).toFixed(2)}%`
+                            : "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500">95% CI</div>
+                        <div className="font-semibold text-blue-300">
+                          {Number.isFinite(stats.ci95.lower) && Number.isFinite(stats.ci95.upper)
+                            ? `${(stats.ci95.lower * 100).toFixed(2)}% - ${(stats.ci95.upper * 100).toFixed(2)}%`
+                            : "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500">Standard error</div>
+                        <div className="font-semibold text-purple-300">
+                          {Number.isFinite(stats.standardError)
+                            ? stats.standardError.toFixed(3)
+                            : "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500">Sample error</div>
+                        <div className="font-semibold text-pink-300">
+                          {Number.isFinite(stats.sampleError)
+                            ? `${(stats.sampleError * 100).toFixed(2)}%`
                             : "—"}
                         </div>
                       </div>
