@@ -1,0 +1,920 @@
+{
+  "id": "survey-1774445314535-ywyw8f1gm",
+  "title": "tn new data latest",
+  "state": "Tamilnadu",
+  "fileName": "file-1774445314402-515720247.xlsx",
+  "uploadedAt": "2026-03-25T13:28:34.535Z",
+  "numVariables": 7,
+  "variablesList": [
+    "Date",
+    "sample",
+    "sample data",
+    "AIADMK+BJP+PMK",
+    "DMK+INC+",
+    "TVK+",
+    "NTK"
+  ],
+  "numInstances": 100,
+  "data": [
+    {
+      "Date": "24-03-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "1210",
+      "AIADMK+BJP+PMK": "43.65%",
+      "DMK+INC+": "31.07%",
+      "TVK+": "21.09%",
+      "NTK": "4.19%"
+    },
+    {
+      "Date": "21-03-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "812",
+      "AIADMK+BJP+PMK": "41.34%",
+      "DMK+INC+": "33.66%",
+      "TVK+": "18.60%",
+      "NTK": "5.12%"
+    },
+    {
+      "Date": "18-03-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "518",
+      "AIADMK+BJP+PMK": "40.70%",
+      "DMK+INC+": "34.32%",
+      "TVK+": "16.56%",
+      "NTK": "5.86%"
+    },
+    {
+      "Date": "15-03-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "682",
+      "AIADMK+BJP+PMK": "40.39%",
+      "DMK+INC+": "34.53%",
+      "TVK+": "16.66%",
+      "NTK": "5.86%"
+    },
+    {
+      "Date": "12-03-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "682",
+      "AIADMK+BJP+PMK": "39.81%",
+      "DMK+INC+": "36.71%",
+      "TVK+": "12.55%",
+      "NTK": "3.67%"
+    },
+    {
+      "Date": "09-03-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "695",
+      "AIADMK+BJP+PMK": "39.28%",
+      "DMK+INC+": "36.95%",
+      "TVK+": "14.90%",
+      "NTK": "4.74%"
+    },
+    {
+      "Date": "06-03-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "721",
+      "AIADMK+BJP+PMK": "42.88%",
+      "DMK+INC+": "38.43%",
+      "TVK+": "10.39%",
+      "NTK": "3.27%"
+    },
+    {
+      "Date": "03-03-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "691",
+      "AIADMK+BJP+PMK": "42.79%",
+      "DMK+INC+": "36.13%",
+      "TVK+": "13.07%",
+      "NTK": "3.96%"
+    },
+    {
+      "Date": "28-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "702",
+      "AIADMK+BJP+PMK": "43.08%",
+      "DMK+INC+": "35.36%",
+      "TVK+": "12.45%",
+      "NTK": "3.79%"
+    },
+    {
+      "Date": "25-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "697",
+      "AIADMK+BJP+PMK": "41.82%",
+      "DMK+INC+": "37.22%",
+      "TVK+": "16.22%",
+      "NTK": "3.28%"
+    },
+    {
+      "Date": "22-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "697",
+      "AIADMK+BJP+PMK": "41.06%",
+      "DMK+INC+": "36.04%",
+      "TVK+": "19.33%",
+      "NTK": "2.91%"
+    },
+    {
+      "Date": "19-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "695",
+      "AIADMK+BJP+PMK": "41.10%",
+      "DMK+INC+": "36.31%",
+      "TVK+": "19.00%",
+      "NTK": "2.70%"
+    },
+    {
+      "Date": "16-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "706",
+      "AIADMK+BJP+PMK": "40.58%",
+      "DMK+INC+": "31.02%",
+      "TVK+": "21.56%",
+      "NTK": "5.44%"
+    },
+    {
+      "Date": "13-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "712",
+      "AIADMK+BJP+PMK": "39.81%",
+      "DMK+INC+": "35.00%",
+      "TVK+": "21.00%",
+      "NTK": "4.00%"
+    },
+    {
+      "Date": "10-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "740",
+      "AIADMK+BJP+PMK": "43.78%",
+      "DMK+INC+": "31.78%",
+      "TVK+": "19.33%",
+      "NTK": "4.22%"
+    },
+    {
+      "Date": "07-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "699",
+      "AIADMK+BJP+PMK": "44.99%",
+      "DMK+INC+": "37.82%",
+      "TVK+": "13.87%",
+      "NTK": "2.52%"
+    },
+    {
+      "Date": "04-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "740",
+      "AIADMK+BJP+PMK": "41.03%",
+      "DMK+INC+": "40.01%",
+      "TVK+": "16.23%",
+      "NTK": "1.91%"
+    },
+    {
+      "Date": "01-02-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "692",
+      "AIADMK+BJP+PMK": "39.43%",
+      "DMK+INC+": "41.07%",
+      "TVK+": "16.16%",
+      "NTK": "1.70%"
+    },
+    {
+      "Date": "29-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "708",
+      "AIADMK+BJP+PMK": "38.23%",
+      "DMK+INC+": "43.33%",
+      "TVK+": "16.00%",
+      "NTK": "1.87%"
+    },
+    {
+      "Date": "26-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "717",
+      "AIADMK+BJP+PMK": "38.16%",
+      "DMK+INC+": "39.24%",
+      "TVK+": "18.99%",
+      "NTK": "2.75%"
+    },
+    {
+      "Date": "23-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "702",
+      "AIADMK+BJP+PMK": "37.70%",
+      "DMK+INC+": "39.70%",
+      "TVK+": "16.00%",
+      "NTK": "2.34%"
+    },
+    {
+      "Date": "20-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "689",
+      "AIADMK+BJP+PMK": "39.99%",
+      "DMK+INC+": "42.59%",
+      "TVK+": "11.88%",
+      "NTK": "1.64%"
+    },
+    {
+      "Date": "17-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "729",
+      "AIADMK+BJP+PMK": "39.00%",
+      "DMK+INC+": "41.00%",
+      "TVK+": "14.00%",
+      "NTK": "4.48%"
+    },
+    {
+      "Date": "14-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "698",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "41.00%",
+      "TVK+": "12.00%",
+      "NTK": "5.47%"
+    },
+    {
+      "Date": "11-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "694",
+      "AIADMK+BJP+PMK": "39.00%",
+      "DMK+INC+": "40.00%",
+      "TVK+": "15.00%",
+      "NTK": "4.57%"
+    },
+    {
+      "Date": "08-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "731",
+      "AIADMK+BJP+PMK": "38.00%",
+      "DMK+INC+": "42.56%",
+      "TVK+": "14.00%",
+      "NTK": "4.00%"
+    },
+    {
+      "Date": "05-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "738",
+      "AIADMK+BJP+PMK": "36.31%",
+      "DMK+INC+": "41.00%",
+      "TVK+": "12.48%",
+      "NTK": "4.12%"
+    },
+    {
+      "Date": "02-01-26",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "701",
+      "AIADMK+BJP+PMK": "34.38%",
+      "DMK+INC+": "42.00%",
+      "TVK+": "14.00%",
+      "NTK": "3.19%"
+    },
+    {
+      "Date": "30-12-25",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "684",
+      "AIADMK+BJP+PMK": "36.27%",
+      "DMK+INC+": "39.91%",
+      "TVK+": "20.89%",
+      "NTK": "2.93%"
+    },
+    {
+      "Date": "27-12-25",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "734",
+      "AIADMK+BJP+PMK": "40.16%",
+      "DMK+INC+": "35.17%",
+      "TVK+": "22.00%",
+      "NTK": "2.68%"
+    },
+    {
+      "Date": "24-12-25",
+      "sample": "AIADMK+BJP+PMK",
+      "sample data": "687",
+      "AIADMK+BJP+PMK": "38.27%",
+      "DMK+INC+": "36.07%",
+      "TVK+": "22.43%",
+      "NTK": "3.23%"
+    },
+    {
+      "Date": "21-12-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "709",
+      "AIADMK+BJP+PMK": "38.33%",
+      "DMK+INC+": "36.15%",
+      "TVK+": "20.98%",
+      "NTK": "4.55%"
+    },
+    {
+      "Date": "18-12-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "712",
+      "AIADMK+BJP+PMK": "41.27%",
+      "DMK+INC+": "37.58%",
+      "TVK+": "21.14%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "15-12-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "684",
+      "AIADMK+BJP+PMK": "48.13%",
+      "DMK+INC+": "37.08%",
+      "TVK+": "14.79%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "12-12-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "707",
+      "AIADMK+BJP+PMK": "42.57%",
+      "DMK+INC+": "40.00%",
+      "TVK+": "14.12%",
+      "NTK": "0.53%"
+    },
+    {
+      "Date": "09-12-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "728",
+      "AIADMK+BJP+PMK": "42.60%",
+      "DMK+INC+": "38.86%",
+      "TVK+": "17.57%",
+      "NTK": "0.98%"
+    },
+    {
+      "Date": "06-12-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "716",
+      "AIADMK+BJP+PMK": "43.00%",
+      "DMK+INC+": "41.00%",
+      "TVK+": "14.00%",
+      "NTK": "1.60%"
+    },
+    {
+      "Date": "03-12-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "710",
+      "AIADMK+BJP+PMK": "38.00%",
+      "DMK+INC+": "37.00%",
+      "TVK+": "20.89%",
+      "NTK": "2.00%"
+    },
+    {
+      "Date": "30-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "697",
+      "AIADMK+BJP+PMK": "35.16%",
+      "DMK+INC+": "31.37%",
+      "TVK+": "22.00%",
+      "NTK": "2.36%"
+    },
+    {
+      "Date": "27-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "699",
+      "AIADMK+BJP+PMK": "37.22%",
+      "DMK+INC+": "34.00%",
+      "TVK+": "21.00%",
+      "NTK": "5.40%"
+    },
+    {
+      "Date": "24-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "696",
+      "AIADMK+BJP+PMK": "35.68%",
+      "DMK+INC+": "29.60%",
+      "TVK+": "22.00%",
+      "NTK": "4.27%"
+    },
+    {
+      "Date": "21-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "701",
+      "AIADMK+BJP+PMK": "42.92%",
+      "DMK+INC+": "40.68%",
+      "TVK+": "13.69%",
+      "NTK": "2.71%"
+    },
+    {
+      "Date": "18-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "724",
+      "AIADMK+BJP+PMK": "43.63%",
+      "DMK+INC+": "35.99%",
+      "TVK+": "17.67%",
+      "NTK": "2.71%"
+    },
+    {
+      "Date": "15-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "725",
+      "AIADMK+BJP+PMK": "43.39%",
+      "DMK+INC+": "36.23%",
+      "TVK+": "18.79%",
+      "NTK": "1.59%"
+    },
+    {
+      "Date": "12-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "705",
+      "AIADMK+BJP+PMK": "41.37%",
+      "DMK+INC+": "30.78%",
+      "TVK+": "26.43%",
+      "NTK": "1.42%"
+    },
+    {
+      "Date": "09-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "735",
+      "AIADMK+BJP+PMK": "40.00%",
+      "DMK+INC+": "34.00%",
+      "TVK+": "20.89%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "06-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "689",
+      "AIADMK+BJP+PMK": "38.45%",
+      "DMK+INC+": "32.18%",
+      "TVK+": "20.89%",
+      "NTK": "8.48%"
+    },
+    {
+      "Date": "03-11-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "727",
+      "AIADMK+BJP+PMK": "35.01%",
+      "DMK+INC+": "38.25%",
+      "TVK+": "20.31%",
+      "NTK": "6.43%"
+    },
+    {
+      "Date": "31-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "686",
+      "AIADMK+BJP+PMK": "36.13%",
+      "DMK+INC+": "44.22%",
+      "TVK+": "15.00%",
+      "NTK": "4.65%"
+    },
+    {
+      "Date": "28-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "705",
+      "AIADMK+BJP+PMK": "39.00%",
+      "DMK+INC+": "38.00%",
+      "TVK+": "18.00%",
+      "NTK": "3.64%"
+    },
+    {
+      "Date": "25-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "700",
+      "AIADMK+BJP+PMK": "43.41%",
+      "DMK+INC+": "36.18%",
+      "TVK+": "17.02%",
+      "NTK": "3.39%"
+    },
+    {
+      "Date": "22-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "687",
+      "AIADMK+BJP+PMK": "48.25%",
+      "DMK+INC+": "30.05%",
+      "TVK+": "18.06%",
+      "NTK": "3.63%"
+    },
+    {
+      "Date": "19-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "707",
+      "AIADMK+BJP+PMK": "47.60%",
+      "DMK+INC+": "32.07%",
+      "TVK+": "17.82%",
+      "NTK": "2.51%"
+    },
+    {
+      "Date": "16-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "709",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "30.44%",
+      "TVK+": "22.00%",
+      "NTK": "4.86%"
+    },
+    {
+      "Date": "13-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "693",
+      "AIADMK+BJP+PMK": "44.00%",
+      "DMK+INC+": "24.38%",
+      "TVK+": "19.01%",
+      "NTK": "3.31%"
+    },
+    {
+      "Date": "10-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "732",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "33.89%",
+      "TVK+": "22.30%",
+      "NTK": "4.66%"
+    },
+    {
+      "Date": "07-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "696",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "33.12%",
+      "TVK+": "19.55%",
+      "NTK": "2.81%"
+    },
+    {
+      "Date": "04-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "694",
+      "AIADMK+BJP+PMK": "40.00%",
+      "DMK+INC+": "36.18%",
+      "TVK+": "14.00%",
+      "NTK": "3.64%"
+    },
+    {
+      "Date": "01-10-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "703",
+      "AIADMK+BJP+PMK": "40.00%",
+      "DMK+INC+": "38.00%",
+      "TVK+": "11.00%",
+      "NTK": "3.64%"
+    },
+    {
+      "Date": "28-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "701",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "36.18%",
+      "TVK+": "21.00%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "25-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "720",
+      "AIADMK+BJP+PMK": "39.00%",
+      "DMK+INC+": "30.05%",
+      "TVK+": "19.00%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "22-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "736",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "30.20%",
+      "TVK+": "20.06%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "19-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "734",
+      "AIADMK+BJP+PMK": "35.28%",
+      "DMK+INC+": "37.25%",
+      "TVK+": "18.00%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "16-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "721",
+      "AIADMK+BJP+PMK": "38.00%",
+      "DMK+INC+": "38.84%",
+      "TVK+": "22.00%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "13-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "719",
+      "AIADMK+BJP+PMK": "38.22%",
+      "DMK+INC+": "36.06%",
+      "TVK+": "21.00%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "10-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "720",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "34.69%",
+      "TVK+": "22.89%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "07-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "725",
+      "AIADMK+BJP+PMK": "42.00%",
+      "DMK+INC+": "33.54%",
+      "TVK+": "21.75%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "04-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "698",
+      "AIADMK+BJP+PMK": "43.64%",
+      "DMK+INC+": "35.45%",
+      "TVK+": "20.91%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "01-09-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "728",
+      "AIADMK+BJP+PMK": "42.00%",
+      "DMK+INC+": "34.00%",
+      "TVK+": "16.19%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "29-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "720",
+      "AIADMK+BJP+PMK": "39.00%",
+      "DMK+INC+": "36.17%",
+      "TVK+": "23.91%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "26-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "731",
+      "AIADMK+BJP+PMK": "39.00%",
+      "DMK+INC+": "39.94%",
+      "TVK+": "20.14%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "23-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "694",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "30.28%",
+      "TVK+": "23.71%",
+      "NTK": "0.00%"
+    },
+    {
+      "Date": "20-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "697",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "35.00%",
+      "TVK+": "21.04%",
+      "NTK": "2.94%"
+    },
+    {
+      "Date": "17-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "700",
+      "AIADMK+BJP+PMK": "36.63%",
+      "DMK+INC+": "33.13%",
+      "TVK+": "25.97%",
+      "NTK": "4.28%"
+    },
+    {
+      "Date": "14-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "731",
+      "AIADMK+BJP+PMK": "39.82%",
+      "DMK+INC+": "32.35%",
+      "TVK+": "24.28%",
+      "NTK": "3.54%"
+    },
+    {
+      "Date": "11-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "711",
+      "AIADMK+BJP+PMK": "38.84%",
+      "DMK+INC+": "31.16%",
+      "TVK+": "25.04%",
+      "NTK": "4.96%"
+    },
+    {
+      "Date": "08-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "723",
+      "AIADMK+BJP+PMK": "42.47%",
+      "DMK+INC+": "35.56%",
+      "TVK+": "19.18%",
+      "NTK": "2.79%"
+    },
+    {
+      "Date": "05-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "720",
+      "AIADMK+BJP+PMK": "42.42%",
+      "DMK+INC+": "33.12%",
+      "TVK+": "22.15%",
+      "NTK": "2.31%"
+    },
+    {
+      "Date": "02-08-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "733",
+      "AIADMK+BJP+PMK": "44.00%",
+      "DMK+INC+": "35.00%",
+      "TVK+": "17.19%",
+      "NTK": "2.64%"
+    },
+    {
+      "Date": "30-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "692",
+      "AIADMK+BJP+PMK": "42.15%",
+      "DMK+INC+": "30.72%",
+      "TVK+": "23.92%",
+      "NTK": "3.21%"
+    },
+    {
+      "Date": "27-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "683",
+      "AIADMK+BJP+PMK": "37.38%",
+      "DMK+INC+": "31.74%",
+      "TVK+": "26.96%",
+      "NTK": "3.92%"
+    },
+    {
+      "Date": "24-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "707",
+      "AIADMK+BJP+PMK": "45.13%",
+      "DMK+INC+": "31.99%",
+      "TVK+": "19.21%",
+      "NTK": "3.67%"
+    },
+    {
+      "Date": "21-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "702",
+      "AIADMK+BJP+PMK": "42.56%",
+      "DMK+INC+": "34.97%",
+      "TVK+": "19.87%",
+      "NTK": "2.60%"
+    },
+    {
+      "Date": "18-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "699",
+      "AIADMK+BJP+PMK": "44.53%",
+      "DMK+INC+": "38.28%",
+      "TVK+": "14.39%",
+      "NTK": "2.80%"
+    },
+    {
+      "Date": "15-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "713",
+      "AIADMK+BJP+PMK": "49.03%",
+      "DMK+INC+": "38.27%",
+      "TVK+": "9.72%",
+      "NTK": "2.98%"
+    },
+    {
+      "Date": "12-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "711",
+      "AIADMK+BJP+PMK": "42.00%",
+      "DMK+INC+": "34.59%",
+      "TVK+": "10.73%",
+      "NTK": "2.90%"
+    },
+    {
+      "Date": "09-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "707",
+      "AIADMK+BJP+PMK": "41.00%",
+      "DMK+INC+": "31.96%",
+      "TVK+": "15.29%",
+      "NTK": "2.16%"
+    },
+    {
+      "Date": "06-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "722",
+      "AIADMK+BJP+PMK": "42.00%",
+      "DMK+INC+": "34.77%",
+      "TVK+": "15.10%",
+      "NTK": "3.25%"
+    },
+    {
+      "Date": "03-07-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "717",
+      "AIADMK+BJP+PMK": "44.00%",
+      "DMK+INC+": "30.57%",
+      "TVK+": "16.60%",
+      "NTK": "3.04%"
+    },
+    {
+      "Date": "30-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "738",
+      "AIADMK+BJP+PMK": "40.96%",
+      "DMK+INC+": "38.93%",
+      "TVK+": "16.58%",
+      "NTK": "3.53%"
+    },
+    {
+      "Date": "27-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "738",
+      "AIADMK+BJP+PMK": "39.68%",
+      "DMK+INC+": "38.42%",
+      "TVK+": "16.86%",
+      "NTK": "5.04%"
+    },
+    {
+      "Date": "24-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "697",
+      "AIADMK+BJP+PMK": "41.82%",
+      "DMK+INC+": "34.82%",
+      "TVK+": "21.31%",
+      "NTK": "2.04%"
+    },
+    {
+      "Date": "21-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "728",
+      "AIADMK+BJP+PMK": "42.56%",
+      "DMK+INC+": "38.27%",
+      "TVK+": "17.12%",
+      "NTK": "2.05%"
+    },
+    {
+      "Date": "18-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "740",
+      "AIADMK+BJP+PMK": "47.52%",
+      "DMK+INC+": "35.45%",
+      "TVK+": "14.46%",
+      "NTK": "2.57%"
+    },
+    {
+      "Date": "15-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "706",
+      "AIADMK+BJP+PMK": "45.09%",
+      "DMK+INC+": "38.45%",
+      "TVK+": "14.05%",
+      "NTK": "2.41%"
+    },
+    {
+      "Date": "12-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "694",
+      "AIADMK+BJP+PMK": "43.09%",
+      "DMK+INC+": "45.10%",
+      "TVK+": "9.98%",
+      "NTK": "1.83%"
+    },
+    {
+      "Date": "09-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "727",
+      "AIADMK+BJP+PMK": "47.04%",
+      "DMK+INC+": "34.72%",
+      "TVK+": "12.18%",
+      "NTK": "6.06%"
+    },
+    {
+      "Date": "06-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "735",
+      "AIADMK+BJP+PMK": "45.45%",
+      "DMK+INC+": "34.92%",
+      "TVK+": "17.36%",
+      "NTK": "2.27%"
+    },
+    {
+      "Date": "03-06-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "723",
+      "AIADMK+BJP+PMK": "45.06%",
+      "DMK+INC+": "38.14%",
+      "TVK+": "15.09%",
+      "NTK": "1.71%"
+    },
+    {
+      "Date": "31-05-25",
+      "sample": "AIADMK+BJP",
+      "sample data": "697",
+      "AIADMK+BJP+PMK": "35.87%",
+      "DMK+INC+": "38.00%",
+      "TVK+": "15.94%",
+      "NTK": "2.54%"
+    }
+  ]
+}

@@ -23,8 +23,21 @@ type VisualizationsTabProps = {
   >;
 };
 
-function isNumeric(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value);
+function parseNumeric(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const s = value.trim();
+    if (s === "") return null;
+    if (s.endsWith("%")) {
+      const num = parseFloat(s.slice(0, -1));
+      if (!Number.isNaN(num)) return num / 100;
+      return null;
+    }
+    const n = parseFloat(s.replace(/,/g, ""));
+    if (!Number.isNaN(n)) return n;
+  }
+  return null;
 }
 
 function computeStats(values: number[]) {
@@ -291,9 +304,9 @@ export const VisualizationsTab: React.FC<VisualizationsTabProps> = ({
     for (const field of numericFields) {
       const values: number[] = [];
       for (const row of filteredRows) {
-        const value = row[field];
-        if (isNumeric(value)) {
-          values.push(value);
+        const parsed = parseNumeric(row[field]);
+        if (parsed !== null) {
+          values.push(parsed);
         }
       }
       map.set(field, values);

@@ -14,15 +14,89 @@ const Plot = dynamic(() => import("react-plotly.js"), {
    [field: string]: string[];
  };
 
-function isNumeric(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value);
+function parseNumeric(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const s = value.trim();
+    if (s === "") return null;
+    // percentage like "43.65%"
+    if (s.endsWith("%")) {
+      const num = parseFloat(s.slice(0, -1));
+      if (!Number.isNaN(num)) return num / 100;
+      return null;
+    }
+    // plain numeric string
+    const n = parseFloat(s.replace(/,/g, ""));
+    if (!Number.isNaN(n)) return n;
+  }
+  return null;
+}
+
+const MONTH_MAP: Record<string, number> = {
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  aug: 7,
+  sep: 8,
+  sept: 8,
+  oct: 9,
+  nov: 10,
+  dec: 11,
+};
+
+function parseDateValueToTs(k: unknown): number | null {
+  if (k == null || k === "") return null;
+  if (typeof k === "number") return k;
+  const native = Date.parse(String(k));
+  if (!Number.isNaN(native)) return native;
+  const s = String(k).trim();
+  const m0 = s.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})$/);
+  if (m0) {
+    const day = parseInt(m0[1], 10);
+    const mon = parseInt(m0[2], 10) - 1;
+    let year = parseInt(m0[3], 10);
+    if (String(m0[3]).length === 2) year += year < 70 ? 2000 : 1900;
+    const dt = new Date(year, mon, day);
+    if (!Number.isNaN(dt.getTime())) return dt.getTime();
+  }
+  const m1 = s.match(/^(\d{1,2})\s+([A-Za-z]+)[\s-]+(\d{2,4})$/);
+  if (m1) {
+    const day = parseInt(m1[1], 10);
+    const mon = m1[2].toLowerCase();
+    const yrRaw = m1[3];
+    const month = MONTH_MAP[mon.slice(0, 3)] ?? MONTH_MAP[mon];
+    if (month !== undefined && !Number.isNaN(day)) {
+      let year = parseInt(yrRaw, 10);
+      if (yrRaw.length === 2) year += year < 70 ? 2000 : 1900;
+      const dt = new Date(year, month, day);
+      if (!Number.isNaN(dt.getTime())) return dt.getTime();
+    }
+  }
+  const m2 = s.match(/^([A-Za-z]+)[\s-]+(\d{2,4})$/);
+  if (m2) {
+    const mon = m2[1].toLowerCase();
+    const yrRaw = m2[2];
+    const month = MONTH_MAP[mon.slice(0, 3)] ?? MONTH_MAP[mon];
+    if (month !== undefined) {
+      let year = parseInt(yrRaw, 10);
+      if (yrRaw.length === 2) year += year < 70 ? 2000 : 1900;
+      const dt = new Date(year, month, 1);
+      if (!Number.isNaN(dt.getTime())) return dt.getTime();
+    }
+  }
+  return null;
 }
 
  function getNumericFields(rows: Record<string, unknown>[]) {
    const numericFields = new Set<string>();
    for (const row of rows) {
      for (const [key, value] of Object.entries(row)) {
-       if (isNumeric(value)) {
+       if (parseNumeric(value) !== null) {
          numericFields.add(key);
        }
      }
@@ -34,9 +108,12 @@ function isNumeric(value: unknown): value is number {
    const categoricalFields = new Set<string>();
    for (const row of rows) {
      for (const [key, value] of Object.entries(row)) {
+       // treat values as categorical only when they are non-empty strings
+       // and cannot be parsed as numeric (so percent strings are excluded)
        if (
          typeof value === "string" &&
            value.trim() !== "" &&
+           parseNumeric(value) === null &&
            key.toLowerCase() !== "id"
        ) {
          categoricalFields.add(key);
@@ -73,9 +150,9 @@ function isNumeric(value: unknown): value is number {
      let sum = 0;
      let count = 0;
      for (const row of rows) {
-       const value = row[field];
-       if (isNumeric(value)) {
-         sum += value;
+       const parsed = parseNumeric(row[field]);
+       if (parsed !== null) {
+         sum += parsed;
          count += 1;
        }
      }
@@ -95,14 +172,26 @@ const DEFAULT_SERIES_PALETTE = [
   "#f87171",
 ];
 
+type TimeSeriesTrace = {
+  x: string[];
+  y: (number | null)[];
+  mode: string;
+  name: string;
+  line: { color: string };
+  marker: { color: string };
+  hovertemplate: string;
+};
+
+type TimeSeriesResult = { traces: TimeSeriesTrace[]; xLabels: string[] };
+
 function buildTimeSeriesTraces(
   rows: Record<string, unknown>[],
   fields: string[],
   xField: string | null,
   fieldColors: Record<string, string> = {}
-) {
+): TimeSeriesResult {
   if (!xField || rows.length === 0 || fields.length === 0) {
-    return [];
+    return { traces: [], xLabels: [] };
   }
 
   type Bucket = {
@@ -117,7 +206,7 @@ function buildTimeSeriesTraces(
     let key: string | number;
     if (typeof raw === "string") {
       key = raw.trim();
-    } else if (isNumeric(raw)) {
+    } else if (typeof raw === "number") {
       key = raw;
     } else if (raw != null) {
       key = String(raw);
@@ -159,6 +248,16 @@ function buildTimeSeriesTraces(
     if (!Number.isNaN(native)) return native;
     // try patterns like "1 Jan-25", "1 Jan 2025", "Jan-25", "Jan 25"
     const s = String(k).trim();
+    // try dd-mm-yy or dd-mm-yyyy like "24-03-26" or "24-03-2026"
+    const m0 = s.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})$/);
+    if (m0) {
+      const day = parseInt(m0[1], 10);
+      const mon = parseInt(m0[2], 10) - 1; // months are 0-based
+      let year = parseInt(m0[3], 10);
+      if (String(m0[3]).length === 2) year += year < 70 ? 2000 : 1900;
+      const dt = new Date(year, mon, day);
+      if (!Number.isNaN(dt.getTime())) return dt.getTime();
+    }
     const m1 = s.match(/^(\d{1,2})\s+([A-Za-z]+)[\s-]+(\d{2,4})$/);
     if (m1) {
       const day = parseInt(m1[1], 10);
@@ -209,21 +308,28 @@ function buildTimeSeriesTraces(
     // fallback: string sort ascending
     buckets.sort((a, b) => String(a.x).localeCompare(String(b.x)));
   }
-  const xLabels = buckets.map((b) => b.x);
+  const xLabels = buckets.map((b) => {
+    const ts = parseKeyToTs(b.x);
+    if (ts !== null) {
+      // Use ISO date (YYYY-MM-DD) so Plotly treats these as dates reliably
+      return new Date(ts).toISOString().slice(0, 10);
+    }
+    return String(b.x);
+  });
 
-  return fields.map((field, idx) => {
+  const traces = fields.map((field, idx) => {
     const yValues = buckets.map(({ rows: bucketRows }) => {
       let sum = 0;
       let count = 0;
       for (const row of bucketRows) {
-        const value = row[field];
-        if (isNumeric(value)) {
-          sum += value;
+        const parsed = parseNumeric(row[field]);
+        if (parsed !== null) {
+          sum += parsed;
           count += 1;
         }
       }
       if (count === 0) return null;
-      return (sum / count) * 100; // percentage scale
+      return (sum / count) * 100; // percentage scale (parsed fractions -> percent)
     });
 
     const lineColor =
@@ -240,6 +346,8 @@ function buildTimeSeriesTraces(
       hovertemplate: "%{x}<br>" + field + ": %{y:.2f}%<extra></extra>",
     };
   });
+
+  return { traces, xLabels };
 }
 
  const ReportsPage: React.FC = () => {
@@ -264,6 +372,10 @@ function buildTimeSeriesTraces(
   const [selectedXAxisField, setSelectedXAxisField] = useState<string | null>(
     null
   );
+  const [rangeStart, setRangeStart] = useState<string | null>(null);
+  const [rangeEnd, setRangeEnd] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
   const [fieldColors, setFieldColors] = useState<Record<string, string>>({});
   const [vizShowCurve, setVizShowCurve] = useState<Record<string, boolean>>({});
   const skipNextSaveRef = useRef(true);
@@ -437,6 +549,8 @@ function buildTimeSeriesTraces(
      [allRows, filters]
    );
 
+  
+
    const averages = useMemo(
      () => computeAverages(filteredRows, selectedAvgFields),
      [filteredRows, selectedAvgFields]
@@ -444,22 +558,72 @@ function buildTimeSeriesTraces(
 
   const defaultXAxisField = useMemo(() => {
     if (allFieldNames.includes("Month")) return "Month";
+    if (allFieldNames.includes("Date")) return "Date";
     if (allFieldNames.includes("date")) return "date";
     return allFieldNames[0] ?? null;
   }, [allFieldNames]);
 
   const effectiveXAxisField = selectedXAxisField ?? defaultXAxisField;
 
-   const timeSeriesTraces = useMemo(
+  // derive available years/months from the filteredRows and the chosen xField
+  const availableYears = useMemo(() => {
+    if (!effectiveXAxisField) return [] as string[];
+    const set = new Set<string>();
+    for (const r of filteredRows) {
+      const ts = parseDateValueToTs(r[effectiveXAxisField]);
+      if (ts !== null) set.add(String(new Date(ts).getFullYear()));
+    }
+    return Array.from(set).sort();
+  }, [filteredRows, effectiveXAxisField]);
+
+  const availableMonths = useMemo(() => {
+    if (!effectiveXAxisField) return [] as string[];
+    const set = new Set<number>();
+    for (const r of filteredRows) {
+      const ts = parseDateValueToTs(r[effectiveXAxisField]);
+      if (ts !== null) set.add(new Date(ts).getMonth() + 1);
+    }
+    return Array.from(set)
+      .sort((a, b) => a - b)
+      .map((m) => String(m).padStart(2, "0"));
+  }, [filteredRows, effectiveXAxisField]);
+
+  // timeFilteredRows applies year/month/range filters on top of categorical filters
+  const timeFilteredRows = useMemo(() => {
+    if (!effectiveXAxisField) return filteredRows;
+    return filteredRows.filter((r) => {
+      const ts = parseDateValueToTs(r[effectiveXAxisField]);
+      if (ts === null) return false;
+      const d = new Date(ts);
+      if (selectedYear) {
+        if (String(d.getFullYear()) !== selectedYear) return false;
+      }
+      if (selectedMonth) {
+        if (String(d.getMonth() + 1).padStart(2, "0") !== selectedMonth)
+          return false;
+      }
+      if (rangeStart) {
+        const rs = Date.parse(rangeStart);
+        if (!Number.isNaN(rs) && ts < rs) return false;
+      }
+      if (rangeEnd) {
+        const re = Date.parse(rangeEnd);
+        if (!Number.isNaN(re) && ts > re) return false;
+      }
+      return true;
+    });
+  }, [filteredRows, effectiveXAxisField, selectedYear, selectedMonth, rangeStart, rangeEnd]);
+
+  const timeSeriesData = useMemo(
     () =>
       buildTimeSeriesTraces(
-        filteredRows,
+        timeFilteredRows,
         selectedSeriesFields,
         effectiveXAxisField,
         fieldColors
       ),
-    [filteredRows, selectedSeriesFields, effectiveXAxisField, fieldColors]
-   );
+    [timeFilteredRows, selectedSeriesFields, effectiveXAxisField, fieldColors]
+  );
 
   const handleToggleFilterValue = (field: string, value: string) => {
     setFilters((prev) => {
@@ -743,6 +907,68 @@ function buildTimeSeriesTraces(
                         ))}
                       </select>
                     </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                      <label className="flex items-center gap-2">
+                        <span className="text-slate-300">Year</span>
+                        <select
+                          value={selectedYear}
+                          onChange={(e) => setSelectedYear(e.target.value)}
+                          className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs"
+                        >
+                          <option value="">All</option>
+                          {availableYears.map((y) => (
+                            <option key={y} value={y}>{y}</option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="flex items-center gap-2">
+                        <span className="text-slate-300">Month</span>
+                        <select
+                          value={selectedMonth}
+                          onChange={(e) => setSelectedMonth(e.target.value)}
+                          className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs"
+                        >
+                          <option value="">All</option>
+                          {availableMonths.map((m) => (
+                            <option key={m} value={m}>{m}</option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="flex items-center gap-2">
+                        <span className="text-slate-300">From</span>
+                        <input
+                          type="date"
+                          value={rangeStart ?? ""}
+                          onChange={(e) => setRangeStart(e.target.value || null)}
+                          className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs"
+                        />
+                      </label>
+
+                      <label className="flex items-center gap-2">
+                        <span className="text-slate-300">To</span>
+                        <input
+                          type="date"
+                          value={rangeEnd ?? ""}
+                          onChange={(e) => setRangeEnd(e.target.value || null)}
+                          className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs"
+                        />
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedYear("");
+                          setSelectedMonth("");
+                          setRangeStart(null);
+                          setRangeEnd(null);
+                        }}
+                        className="ml-2 rounded bg-slate-800 px-2 py-1 text-xs text-cyan-300"
+                      >
+                        Clear
+                      </button>
+                    </div>
                   </div>
                   <div className="flex flex-col gap-1 text-xs">
                     <span className="font-medium text-slate-300">
@@ -809,7 +1035,7 @@ function buildTimeSeriesTraces(
                    <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60">
                      <div className="h-[360px]">
                        <Plot
-                         data={timeSeriesTraces}
+                         data={timeSeriesData?.traces ?? []}
                          layout={{
                            paper_bgcolor: "rgba(15,23,42,1)",
                            plot_bgcolor: "rgba(15,23,42,1)",
@@ -827,6 +1053,24 @@ function buildTimeSeriesTraces(
                              tickfont: { color: "#9ca3af", size: 10 },
                              titlefont: { color: "#e5e7eb", size: 11 },
                              gridcolor: "rgba(55,65,81,0.3)",
+                             tickmode: "array",
+                             tickvals: timeSeriesData?.xLabels ?? undefined,
+                             ticktext: timeSeriesData?.xLabels?.map((d) => {
+                               // convert ISO YYYY-MM-DD to DD-MM-YY
+                               if (typeof d !== "string") return String(d);
+                               const parts = d.split("-");
+                               if (parts.length !== 3) return d;
+                               return `${parts[2].slice(-2)}-${parts[1]}-${parts[0].slice(-2)}`;
+                             }) ?? undefined,
+                            rangeselector: {
+                              buttons: [
+                                { count: 1, label: "1m", step: "month", stepmode: "backward" },
+                                { count: 3, label: "3m", step: "month", stepmode: "backward" },
+                                { count: 6, label: "6m", step: "month", stepmode: "backward" },
+                                { step: "all", label: "All" },
+                              ],
+                            },
+                            rangeslider: { visible: true },
                            },
                            yaxis: {
                              title: "Percentage",
